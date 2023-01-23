@@ -171,6 +171,7 @@ dependencies = [
  "bytes-kman",
  "dirs",
  "muzzman-lib",
+ "rand",
  "tokio",
 ]
 

@@ -4,20 +4,51 @@ use muzzman_lib::{prelude::LocationId, session::SessionError};
 // send
 #[derive(Clone, Debug, Bytes)]
 pub enum ServerPackets {
-    GetDefaultLocation,
-    GetLocationName { from: LocationId },
-    SetLocationName { from: LocationId, to: String },
-    GetLocationDesc { from: LocationId },
-    SetLocationDesc { from: LocationId, to: String },
-    GetLocationInfo { from: LocationId },
+    GetDefaultLocation {
+        id: u128,
+    },
+    GetLocationName {
+        id: u128,
+        from: LocationId,
+    },
+    SetLocationName {
+        id: u128,
+        from: LocationId,
+        to: String,
+    },
+    GetLocationDesc {
+        id: u128,
+        from: LocationId,
+    },
+    SetLocationDesc {
+        id: u128,
+        from: LocationId,
+        to: String,
+    },
+    GetLocationInfo {
+        id: u128,
+        from: LocationId,
+    },
 }
 
 // recv
 #[derive(Clone, Debug, Bytes)]
 pub enum ClientPackets {
-    GetDefaultLocation(Result<LocationId, SessionError>),
-    GetLocationName(Result<(LocationId, String), SessionError>),
-    SetLocationName(Result<(LocationId, String), SessionError>),
-    GetLocationDesc(Result<(LocationId, String), SessionError>),
-    SetLocationDesc(Result<(LocationId, String), SessionError>),
+    GetDefaultLocation(u128, Result<LocationId, SessionError>),
+    GetLocationName(u128, Result<String, SessionError>),
+    SetLocationName(u128, Result<(), SessionError>),
+    GetLocationDesc(u128, Result<String, SessionError>),
+    SetLocationDesc(u128, Result<(), SessionError>),
+}
+
+impl ClientPackets {
+    pub fn id(&self) -> u128 {
+        match self {
+            ClientPackets::GetDefaultLocation(id, _) => *id,
+            ClientPackets::GetLocationName(id, _) => *id,
+            ClientPackets::SetLocationName(id, _) => *id,
+            ClientPackets::GetLocationDesc(id, _) => *id,
+            ClientPackets::SetLocationDesc(id, _) => *id,
+        }
+    }
 }
