@@ -1,5 +1,8 @@
 use bytes_kman::prelude::*;
-use muzzman_lib::{prelude::LocationId, session::SessionError};
+use muzzman_lib::{
+    prelude::{LocationId, LocationInfo},
+    session::SessionError,
+};
 
 // send
 #[derive(Clone, Debug, Bytes)]
@@ -39,6 +42,7 @@ pub enum ClientPackets {
     SetLocationName(u128, Result<(), SessionError>),
     GetLocationDesc(u128, Result<String, SessionError>),
     SetLocationDesc(u128, Result<(), SessionError>),
+    GetLocationInfo(u128, Result<LocationInfo, SessionError>),
 }
 
 impl ClientPackets {
@@ -49,6 +53,7 @@ impl ClientPackets {
             ClientPackets::SetLocationName(id, _) => *id,
             ClientPackets::GetLocationDesc(id, _) => *id,
             ClientPackets::SetLocationDesc(id, _) => *id,
+            ClientPackets::GetLocationInfo(id, _) => *id,
         }
     }
 }

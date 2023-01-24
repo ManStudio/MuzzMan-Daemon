@@ -18,18 +18,17 @@ pub mod packets;
 pub struct DaemonSession {
     pub conn: UdpSocket,
     pub packets: Vec<ClientPackets>,
-    pub pading_packets: Vec<ServerPackets>,
     pub generator: u128,
 }
 
 impl DaemonSession {
     pub fn new() -> Result<Self, std::io::Error> {
-        let conn = UdpSocket::bind(format!("localhost:{}", rand::random::<u16>()))?;
-        conn.connect("localhost:2118")?;
+        let conn = UdpSocket::bind(format!("0.0.0.0:{}", rand::random::<u16>()))?;
+        conn.connect("0.0.0.0:2118")?;
+        conn.set_read_timeout(Some(Duration::new(10, 0)));
         Ok(Self {
             conn,
             packets: vec![],
-            pading_packets: vec![],
             generator: 1,
         })
     }
@@ -42,6 +41,7 @@ impl DaemonSession {
 
             while !buffer.is_empty() {
                 if let Some(packet) = ClientPackets::from_bytes(&mut buffer) {
+                    println!("Recv {:?}", packet);
                     self.packets.push(packet)
                 }
             }
@@ -479,19 +479,61 @@ impl TSession for Box<dyn TDaemonSession> {
     }
 
     fn location_get_name(&self, location_id: &LocationId) -> Result<String, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::GetLocationName {
+            id,
+            from: location_id.clone(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::GetLocationName(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn location_set_name(&self, location_id: &LocationId, name: &str) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::SetLocationName {
+            id,
+            from: location_id.clone(),
+            to: name.to_string(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::SetLocationName(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn location_get_desc(&self, location_id: &LocationId) -> Result<String, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::GetLocationDesc {
+            id,
+            from: location_id.clone(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::GetLocationDesc(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn location_set_desc(&self, location_id: &LocationId, desc: &str) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::SetLocationDesc {
+            id,
+            from: location_id.clone(),
+            to: desc.to_string(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::SetLocationDesc(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn location_get_path(&self, location_id: &LocationId) -> Result<PathBuf, SessionError> {
@@ -549,7 +591,17 @@ impl TSession for Box<dyn TDaemonSession> {
         &self,
         location_id: &LocationId,
     ) -> Result<LocationInfo, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::GetLocationInfo {
+            id,
+            from: location_id.clone(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::GetLocationInfo(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn location_notify(&self, location_id: &LocationId, event: Event) -> Result<(), SessionError> {

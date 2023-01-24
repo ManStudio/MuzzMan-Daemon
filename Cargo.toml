@@ -5,6 +5,12 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[workspace]
+[[example]]
+name = "get_location_info"
+path = "./examples/get_location_info.rs"
+
+
 [dependencies]
 bytes-kman = "0.1.17"
 tokio = {version = "1.24.2", features = ["full"]}

@@ -1,7 +1,7 @@
 use std::{net::SocketAddr, str::FromStr};
 
 use bytes_kman::TBytes;
-use muzzman_daemon::packets::ServerPackets;
+use muzzman_daemon::packets::{ClientPackets, ServerPackets};
 use muzzman_lib::{prelude::TLocation, session::TSession};
 
 fn main() {
@@ -28,24 +28,73 @@ impl Default for Daemon {
 }
 
 impl Daemon {
-    pub async fn run() {
-        let socket_addr = SocketAddr::from_str("localhost:2118").unwrap();
+    pub async fn run(self) {
+        let socket_addr = SocketAddr::from_str("0.0.0.0:2118").unwrap();
         let socket = tokio::net::UdpSocket::bind(socket_addr).await.unwrap();
 
         let mut buffer = vec![0; 4096];
 
         loop {
-            let len = socket.recv(&mut buffer).await.unwrap();
+            let (len, addr) = socket.recv_from(&mut buffer).await.unwrap();
             let mut buffer = buffer[0..len].to_vec();
             while !buffer.is_empty() {
                 let Some(packet) = ServerPackets::from_bytes(&mut buffer)else{continue};
+                println!("Recived Packet: {:?}", packet);
                 match packet {
-                    ServerPackets::GetDefaultLocation => {}
-                    ServerPackets::GetLocationName { from } => todo!(),
-                    ServerPackets::SetLocationName { from, to } => todo!(),
-                    ServerPackets::GetLocationDesc { from } => todo!(),
-                    ServerPackets::SetLocationDesc { from, to } => todo!(),
-                    ServerPackets::GetLocationInfo { from } => todo!(),
+                    ServerPackets::GetDefaultLocation { id } => {
+                        let packet = match self.session.get_default_location() {
+                            Ok(ok) => ClientPackets::GetDefaultLocation(id, Ok(ok.id())),
+                            Err(err) => ClientPackets::GetDefaultLocation(id, Err(err)),
+                        };
+                        let mut bytes = packet.to_bytes();
+                        bytes.reverse();
+                        let _ = socket.send_to(&bytes, addr).await;
+                    }
+                    ServerPackets::GetLocationName { id, from } => {
+                        let packet = match self.session.location_get_name(&from) {
+                            Ok(ok) => ClientPackets::GetLocationName(id, Ok(ok)),
+                            Err(err) => ClientPackets::GetLocationName(id, Err(err)),
+                        };
+                        let mut bytes = packet.to_bytes();
+                        bytes.reverse();
+                        let _ = socket.send_to(&bytes, addr).await;
+                    }
+                    ServerPackets::SetLocationName { id, from, to } => {
+                        let packet = match self.session.location_set_name(&from, &to) {
+                            Ok(ok) => ClientPackets::SetLocationName(id, Ok(ok)),
+                            Err(err) => ClientPackets::SetLocationName(id, Err(err)),
+                        };
+                        let mut bytes = packet.to_bytes();
+                        bytes.reverse();
+                        let _ = socket.send_to(&bytes, addr).await;
+                    }
+                    ServerPackets::GetLocationDesc { id, from } => {
+                        let packet = match self.session.location_get_desc(&from) {
+                            Ok(ok) => ClientPackets::GetLocationDesc(id, Ok(ok)),
+                            Err(err) => ClientPackets::GetLocationDesc(id, Err(err)),
+                        };
+                        let mut bytes = packet.to_bytes();
+                        bytes.reverse();
+                        let _ = socket.send_to(&bytes, addr).await;
+                    }
+                    ServerPackets::SetLocationDesc { id, from, to } => {
+                        let packet = match self.session.location_set_desc(&from, &to) {
+                            Ok(ok) => ClientPackets::SetLocationDesc(id, Ok(ok)),
+                            Err(err) => ClientPackets::SetLocationDesc(id, Err(err)),
+                        };
+                        let mut bytes = packet.to_bytes();
+                        bytes.reverse();
+                        let _ = socket.send_to(&bytes, addr).await;
+                    }
+                    ServerPackets::GetLocationInfo { id, from } => {
+                        let packet = match self.session.location_get_location_info(&from) {
+                            Ok(ok) => ClientPackets::GetLocationInfo(id, Ok(ok)),
+                            Err(err) => ClientPackets::GetLocationInfo(id, Err(err)),
+                        };
+                        let mut bytes = packet.to_bytes();
+                        bytes.reverse();
+                        let _ = socket.send_to(&bytes, addr).await;
+                    }
                 }
             }
         }
@@ -54,6 +103,5 @@ impl Daemon {
 
 async fn tokio_main() {
     let daemon = Daemon::default();
-
-    std::future::pending::<()>().await
+    daemon.run().await;
 }
