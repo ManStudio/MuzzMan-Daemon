@@ -9,7 +9,7 @@ use std::{
 use bytes_kman::TBytes;
 use muzzman_daemon::packets::{ClientPackets, ServerPackets};
 use muzzman_lib::{
-    prelude::{SessionEvent, TElement, TLocation},
+    prelude::{SessionEvent, TElement, TLocation, TModuleInfo},
     session::TSession,
 };
 use polling::Poller;
@@ -212,6 +212,58 @@ impl Daemon {
                     let packet = ClientPackets::ElementGetInfo(
                         id,
                         self.session.element_get_element_info(&element_id),
+                    );
+                    self.inner.send(packet, &addr);
+                }
+                ServerPackets::LoadModule { id, path } => {
+                    let packet = ClientPackets::LoadModule(
+                        id,
+                        match self.session.load_module(path) {
+                            Ok(ok) => Ok(ok.id()),
+                            Err(err) => Err(err),
+                        },
+                    );
+                    self.inner.send(packet, &addr);
+                }
+                ServerPackets::RemoveModule { id, module_id } => {
+                    let packet = ClientPackets::RemoveModule(
+                        id,
+                        match self.session.remove_module(module_id) {
+                            Ok(_) => Ok(()),
+                            Err(err) => Err(err),
+                        },
+                    );
+                    self.inner.send(packet, &addr);
+                }
+                ServerPackets::GetActionsLen { id } => {
+                    let packet = ClientPackets::GetActionsLen(id, self.session.get_actions_len());
+                    self.inner.send(packet, &addr);
+                }
+                ServerPackets::GetActions { id, range } => {
+                    let packet = ClientPackets::GetActions(
+                        id,
+                        match self.session.get_actions(range) {
+                            Ok(ok) => {
+                                let mut tmp = Vec::new();
+                                for k in ok {
+                                    tmp.push((k.0, k.1.id(), k.2));
+                                }
+                                Ok(tmp)
+                            }
+                            Err(err) => Err(err),
+                        },
+                    );
+                    self.inner.send(packet, &addr);
+                }
+                ServerPackets::RunAction {
+                    id,
+                    module_id,
+                    name,
+                    data,
+                } => {
+                    let packet = ClientPackets::RunAction(
+                        id,
+                        self.session.run_action(&module_id, name, data),
                     );
                     self.inner.send(packet, &addr);
                 }

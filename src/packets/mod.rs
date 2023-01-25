@@ -1,12 +1,38 @@
+use std::{ops::Range, path::PathBuf};
+
 use bytes_kman::prelude::*;
 use muzzman_lib::{
-    prelude::{ElementId, ElementInfo, LocationId, LocationInfo, SessionEvent},
-    session::SessionError,
+    prelude::{ElementId, ElementInfo, LocationId, LocationInfo, ModuleId, SessionEvent, Value},
+    session::{Actions, SessionError},
+    types::Type,
 };
 
 // send
 #[derive(Clone, Debug, Bytes)]
 pub enum ServerPackets {
+    LoadModule {
+        id: u128,
+        path: PathBuf,
+    },
+    RemoveModule {
+        id: u128,
+        module_id: ModuleId,
+    },
+
+    GetActionsLen {
+        id: u128,
+    },
+    GetActions {
+        id: u128,
+        range: Range<usize>,
+    },
+    RunAction {
+        id: u128,
+        module_id: ModuleId,
+        name: String,
+        data: Vec<Type>,
+    },
+
     GetDefaultLocation {
         id: u128,
     },
@@ -76,6 +102,16 @@ pub enum ServerPackets {
 // recv
 #[derive(Clone, Debug, Bytes)]
 pub enum ClientPackets {
+    LoadModule(u128, Result<ModuleId, SessionError>),
+    RemoveModule(u128, Result<(), SessionError>),
+
+    GetActionsLen(u128, Result<usize, SessionError>),
+    GetActions(
+        u128,
+        Result<Vec<(String, ModuleId, Vec<(String, Value)>)>, SessionError>,
+    ),
+    RunAction(u128, Result<(), SessionError>),
+
     GetDefaultLocation(u128, Result<LocationId, SessionError>),
     LocationGetName(u128, Result<String, SessionError>),
     LocationSetName(u128, Result<(), SessionError>),
@@ -112,6 +148,11 @@ impl ClientPackets {
             ClientPackets::ElementGetMeta(id, _) => *id,
             ClientPackets::ElementSetMeta(id, _) => *id,
             ClientPackets::ElementGetInfo(id, _) => *id,
+            ClientPackets::LoadModule(id, _) => *id,
+            ClientPackets::RemoveModule(id, _) => *id,
+            ClientPackets::GetActionsLen(id, _) => *id,
+            ClientPackets::GetActions(id, _) => *id,
+            ClientPackets::RunAction(id, _) => *id,
             ClientPackets::NewSessionEvent(_) => 0,
         }
     }

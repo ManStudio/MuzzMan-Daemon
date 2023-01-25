@@ -1,4 +1,7 @@
-use std::path::PathBuf;
+use std::{
+    path::PathBuf,
+    sync::{Arc, RwLock},
+};
 
 use crate::{
     packets::{ClientPackets, ServerPackets},
@@ -8,11 +11,33 @@ use muzzman_lib::prelude::*;
 
 impl TSession for Box<dyn TDaemonSession> {
     fn load_module(&self, path: PathBuf) -> Result<MRef, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::LoadModule { id, path };
+
+        self.send(packet);
+        if let Some(ClientPackets::LoadModule(_, response)) = self.waiting_for(id) {
+            match response {
+                Ok(ok) => Ok(self.mref_get_or_add(ok)),
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
-    fn remove_module(&self, id: ModuleId) -> Result<MRow, SessionError> {
-        todo!()
+    fn remove_module(&self, module_id: ModuleId) -> Result<MRow, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::RemoveModule { id, module_id };
+
+        self.send(packet);
+        if let Some(ClientPackets::RemoveModule(_, response)) = self.waiting_for(id) {
+            match response {
+                Ok(_) => Err(SessionError::Custom("Cannot be transfered".into())),
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn register_action(
@@ -30,11 +55,36 @@ impl TSession for Box<dyn TDaemonSession> {
     }
 
     fn get_actions(&self, range: std::ops::Range<usize>) -> Result<Actions, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::GetActions { id, range };
+
+        self.send(packet);
+        if let Some(ClientPackets::GetActions(_, response)) = self.waiting_for(id) {
+            match response {
+                Ok(ok) => {
+                    let mut tmp = Vec::new();
+                    for k in ok {
+                        tmp.push((k.0, self.mref_get_or_add(k.1), k.2))
+                    }
+                    Ok(tmp)
+                }
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn get_actions_len(&self) -> Result<usize, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::GetActionsLen { id };
+
+        self.send(packet);
+        if let Some(ClientPackets::GetActionsLen(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn run_action(
@@ -43,7 +93,20 @@ impl TSession for Box<dyn TDaemonSession> {
         name: String,
         data: Vec<Type>,
     ) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::RunAction {
+            id,
+            module_id: *module_id,
+            name,
+            data,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::RunAction(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn get_modules_len(&self) -> Result<usize, SessionError> {
