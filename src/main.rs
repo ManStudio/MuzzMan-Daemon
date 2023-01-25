@@ -267,6 +267,92 @@ impl Daemon {
                     );
                     self.inner.send(packet, &addr);
                 }
+                ServerPackets::GetModulesLen { id } => {
+                    let packet = ClientPackets::GetModulesLen(id, self.session.get_modules_len());
+                    self.inner.send(packet, &addr);
+                }
+                ServerPackets::GetModules { id, range } => {
+                    let packet = ClientPackets::GetModules(
+                        id,
+                        match self.session.get_modules(range) {
+                            Ok(ok) => {
+                                let mut tmp = Vec::with_capacity(ok.len());
+                                for k in ok {
+                                    tmp.push(k.id())
+                                }
+                                Ok(tmp)
+                            }
+                            Err(err) => Err(err),
+                        },
+                    );
+                    self.inner.send(packet, &addr);
+                }
+                ServerPackets::ModuleGetName { id, module_id } => {
+                    let packet =
+                        ClientPackets::ModuleGetName(id, self.session.get_module_name(&module_id));
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ModuleSetName { id, module_id, to } => {
+                    let packet = ClientPackets::ModuleSetName(
+                        id,
+                        self.session.set_module_name(&module_id, to),
+                    );
+                    self.inner.send(packet, &addr);
+                }
+                ServerPackets::ModuleGetDefaultName { id, module_id } => {
+                    let packet = ClientPackets::ModuleDefaultName(
+                        id,
+                        self.session.default_module_name(&module_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ModuleGetDesc { id, module_id } => {
+                    let packet =
+                        ClientPackets::ModuleGetDesc(id, self.session.get_module_desc(&module_id));
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ModuleSetDesc { id, module_id, to } => {
+                    let packet = ClientPackets::ModuleSetDesc(
+                        id,
+                        self.session.set_module_desc(&module_id, to),
+                    );
+                    self.inner.send(packet, &addr);
+                }
+                ServerPackets::ModuleGetDefaultDesc { id, module_id } => {
+                    let packet = ClientPackets::ModuleDefaultDesc(
+                        id,
+                        self.session.default_module_desc(&module_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ModuleGetProxy { id, module_id } => {
+                    let packet = ClientPackets::ModuleGetProxy(
+                        id,
+                        self.session.get_module_proxy(&module_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ModuleSetProxy { id, module_id, to } => {
+                    let packet = ClientPackets::ModuleSetProxy(
+                        id,
+                        self.session.set_module_proxy(&module_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ModuleGetSettings { id, module_id } => {
+                    let packet = ClientPackets::ModuleGetSettings(
+                        id,
+                        self.session.get_module_settings(&module_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ModuleSetSettings { id, module_id, to } => {
+                    let packet = ClientPackets::ModuleSetSettings(
+                        id,
+                        self.session.set_module_settings(&module_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
                 ServerPackets::Tick => {}
             }
         }

@@ -2,7 +2,9 @@ use std::{ops::Range, path::PathBuf};
 
 use bytes_kman::prelude::*;
 use muzzman_lib::{
-    prelude::{ElementId, ElementInfo, LocationId, LocationInfo, ModuleId, SessionEvent, Value},
+    prelude::{
+        Data, ElementId, ElementInfo, LocationId, LocationInfo, ModuleId, SessionEvent, Value,
+    },
     session::{Actions, SessionError},
     types::Type,
 };
@@ -31,6 +33,58 @@ pub enum ServerPackets {
         module_id: ModuleId,
         name: String,
         data: Vec<Type>,
+    },
+
+    GetModulesLen {
+        id: u128,
+    },
+    GetModules {
+        id: u128,
+        range: Range<usize>,
+    },
+    ModuleGetName {
+        id: u128,
+        module_id: ModuleId,
+    },
+    ModuleSetName {
+        id: u128,
+        module_id: ModuleId,
+        to: String,
+    },
+    ModuleGetDefaultName {
+        id: u128,
+        module_id: ModuleId,
+    },
+    ModuleGetDesc {
+        id: u128,
+        module_id: ModuleId,
+    },
+    ModuleSetDesc {
+        id: u128,
+        module_id: ModuleId,
+        to: String,
+    },
+    ModuleGetDefaultDesc {
+        id: u128,
+        module_id: ModuleId,
+    },
+    ModuleGetProxy {
+        id: u128,
+        module_id: ModuleId,
+    },
+    ModuleSetProxy {
+        id: u128,
+        module_id: ModuleId,
+        to: usize,
+    },
+    ModuleGetSettings {
+        id: u128,
+        module_id: ModuleId,
+    },
+    ModuleSetSettings {
+        id: u128,
+        module_id: ModuleId,
+        to: Data,
     },
 
     GetDefaultLocation {
@@ -112,6 +166,19 @@ pub enum ClientPackets {
     ),
     RunAction(u128, Result<(), SessionError>),
 
+    GetModulesLen(u128, Result<usize, SessionError>),
+    GetModules(u128, Result<Vec<ModuleId>, SessionError>),
+    ModuleGetName(u128, Result<String, SessionError>),
+    ModuleSetName(u128, Result<(), SessionError>),
+    ModuleDefaultName(u128, Result<(), SessionError>),
+    ModuleGetDesc(u128, Result<String, SessionError>),
+    ModuleSetDesc(u128, Result<(), SessionError>),
+    ModuleDefaultDesc(u128, Result<(), SessionError>),
+    ModuleGetProxy(u128, Result<usize, SessionError>),
+    ModuleSetProxy(u128, Result<(), SessionError>),
+    ModuleGetSettings(u128, Result<Data, SessionError>),
+    ModuleSetSettings(u128, Result<(), SessionError>),
+
     GetDefaultLocation(u128, Result<LocationId, SessionError>),
     LocationGetName(u128, Result<String, SessionError>),
     LocationSetName(u128, Result<(), SessionError>),
@@ -153,6 +220,18 @@ impl ClientPackets {
             ClientPackets::GetActionsLen(id, _) => *id,
             ClientPackets::GetActions(id, _) => *id,
             ClientPackets::RunAction(id, _) => *id,
+            ClientPackets::GetModulesLen(id, _) => *id,
+            ClientPackets::GetModules(id, _) => *id,
+            ClientPackets::ModuleGetName(id, _) => *id,
+            ClientPackets::ModuleSetName(id, _) => *id,
+            ClientPackets::ModuleDefaultName(id, _) => *id,
+            ClientPackets::ModuleGetDesc(id, _) => *id,
+            ClientPackets::ModuleSetDesc(id, _) => *id,
+            ClientPackets::ModuleDefaultDesc(id, _) => *id,
+            ClientPackets::ModuleGetProxy(id, _) => *id,
+            ClientPackets::ModuleSetProxy(id, _) => *id,
+            ClientPackets::ModuleGetSettings(id, _) => *id,
+            ClientPackets::ModuleSetSettings(id, _) => *id,
             ClientPackets::NewSessionEvent(_) => 0,
         }
     }

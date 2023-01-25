@@ -110,51 +110,190 @@ impl TSession for Box<dyn TDaemonSession> {
     }
 
     fn get_modules_len(&self) -> Result<usize, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::GetModulesLen { id };
+
+        self.send(packet);
+        if let Some(ClientPackets::GetModulesLen(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn get_modules(&self, range: std::ops::Range<usize>) -> Result<Vec<MRef>, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::GetModules { id, range };
+
+        self.send(packet);
+        if let Some(ClientPackets::GetModules(_, response)) = self.waiting_for(id) {
+            match response {
+                Ok(ok) => {
+                    let mut tmp = Vec::new();
+                    for k in ok {
+                        tmp.push(self.mref_get_or_add(k))
+                    }
+                    Ok(tmp)
+                }
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn get_module_name(&self, module_id: &ModuleId) -> Result<String, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ModuleGetName {
+            id,
+            module_id: *module_id,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleGetName(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn set_module_name(&self, module_id: &ModuleId, name: String) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ModuleSetName {
+            id,
+            module_id: *module_id,
+            to: name,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleSetName(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn default_module_name(&self, module_id: &ModuleId) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ModuleGetDefaultName {
+            id,
+            module_id: *module_id,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleDefaultName(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn get_module_desc(&self, module_id: &ModuleId) -> Result<String, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ModuleGetDesc {
+            id,
+            module_id: *module_id,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleGetDesc(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn set_module_desc(&self, module_id: &ModuleId, desc: String) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ModuleSetDesc {
+            id,
+            module_id: *module_id,
+            to: desc,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleSetDesc(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn default_module_desc(&self, module_id: &ModuleId) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ModuleGetDefaultDesc {
+            id,
+            module_id: *module_id,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleDefaultDesc(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn get_module_proxy(&self, module_id: &ModuleId) -> Result<usize, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ModuleGetProxy {
+            id,
+            module_id: *module_id,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleGetProxy(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn set_module_proxy(&self, module_id: &ModuleId, proxy: usize) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ModuleSetProxy {
+            id,
+            module_id: *module_id,
+            to: proxy,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleSetProxy(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn get_module_settings(&self, module_id: &ModuleId) -> Result<Data, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ModuleGetSettings {
+            id,
+            module_id: *module_id,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleGetSettings(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn set_module_settings(&self, module_id: &ModuleId, data: Data) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ModuleSetSettings {
+            id,
+            module_id: *module_id,
+            to: data,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleSetSettings(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn get_module_element_settings(&self, module_id: &ModuleId) -> Result<Data, SessionError> {
