@@ -11,4 +11,15 @@ fn main() {
         "Default Location Info: {:?}",
         default_location.get_location_info().unwrap()
     );
+
+    let new_element = default_location.create_element("TestElement").unwrap();
+    println!(
+        "Element Info: {:?}",
+        new_element.get_element_info().unwrap()
+    );
+
+    println!(
+        "Default Location Info: {:?}",
+        default_location.get_location_info().unwrap()
+    );
 }
