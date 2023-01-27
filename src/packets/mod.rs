@@ -3,7 +3,8 @@ use std::{ops::Range, path::PathBuf};
 use bytes_kman::prelude::*;
 use muzzman_lib::{
     prelude::{
-        Data, ElementId, ElementInfo, LocationId, LocationInfo, ModuleId, SessionEvent, Value,
+        Data, ElementId, ElementInfo, FileOrData, LocationId, LocationInfo, ModuleId, SessionEvent,
+        Value,
     },
     session::{Actions, SessionError},
     types::Type,
@@ -85,6 +86,37 @@ pub enum ServerPackets {
         id: u128,
         module_id: ModuleId,
         to: Data,
+    },
+
+    ModuleGetElementSettings {
+        id: u128,
+        module_id: ModuleId,
+    },
+    ModuleSetElementSettings {
+        id: u128,
+        module_id: ModuleId,
+        to: Data,
+    },
+    ModuleInitLocation {
+        id: u128,
+        module_id: ModuleId,
+        location_id: LocationId,
+        data: FileOrData,
+    },
+    ModuleInitElement {
+        id: u128,
+        module_id: ModuleId,
+        element_id: ElementId,
+    },
+    ModuleAcceptUrl {
+        id: u128,
+        module_id: ModuleId,
+        url: String,
+    },
+    ModuleAcceptExtension {
+        id: u128,
+        module_id: ModuleId,
+        filename: String,
     },
 
     GetDefaultLocation {
@@ -178,6 +210,12 @@ pub enum ClientPackets {
     ModuleSetProxy(u128, Result<(), SessionError>),
     ModuleGetSettings(u128, Result<Data, SessionError>),
     ModuleSetSettings(u128, Result<(), SessionError>),
+    ModuleGetElementSettings(u128, Result<Data, SessionError>),
+    ModuleSetElementSettings(u128, Result<(), SessionError>),
+    ModuleInitLocation(u128, Result<(), SessionError>),
+    ModuleInitElement(u128, Result<(), SessionError>),
+    ModuleAcceptUrl(u128, Result<bool, SessionError>),
+    ModuleAcceptExtension(u128, Result<bool, SessionError>),
 
     GetDefaultLocation(u128, Result<LocationId, SessionError>),
     LocationGetName(u128, Result<String, SessionError>),
@@ -232,6 +270,12 @@ impl ClientPackets {
             ClientPackets::ModuleSetProxy(id, _) => *id,
             ClientPackets::ModuleGetSettings(id, _) => *id,
             ClientPackets::ModuleSetSettings(id, _) => *id,
+            ClientPackets::ModuleGetElementSettings(id, _) => *id,
+            ClientPackets::ModuleSetElementSettings(id, _) => *id,
+            ClientPackets::ModuleInitLocation(id, _) => *id,
+            ClientPackets::ModuleInitElement(id, _) => *id,
+            ClientPackets::ModuleAcceptUrl(id, _) => *id,
+            ClientPackets::ModuleAcceptExtension(id, _) => *id,
             ClientPackets::NewSessionEvent(_) => 0,
         }
     }

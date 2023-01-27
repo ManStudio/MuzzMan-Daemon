@@ -9,7 +9,7 @@ use std::{
 use bytes_kman::TBytes;
 use muzzman_daemon::packets::{ClientPackets, ServerPackets};
 use muzzman_lib::{
-    prelude::{SessionEvent, TElement, TLocation, TModuleInfo},
+    prelude::{TElement, TLocation, TModuleInfo, Url},
     session::TSession,
 };
 use polling::Poller;
@@ -352,6 +352,64 @@ impl Daemon {
                         self.session.set_module_settings(&module_id, to),
                     );
                     self.inner.send(packet, &addr)
+                }
+                ServerPackets::ModuleGetElementSettings { id, module_id } => {
+                    let packet = ClientPackets::ModuleGetElementSettings(
+                        id,
+                        self.session.get_module_element_settings(&module_id),
+                    );
+                    self.inner.send(packet, &addr);
+                }
+                ServerPackets::ModuleSetElementSettings { id, module_id, to } => {
+                    let packet = ClientPackets::ModuleSetElementSettings(
+                        id,
+                        self.session.set_module_element_settings(&module_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ModuleInitLocation {
+                    id,
+                    module_id,
+                    location_id,
+                    data,
+                } => {
+                    let packet = ClientPackets::ModuleInitLocation(
+                        id,
+                        self.session
+                            .module_init_location(&module_id, &location_id, data),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ModuleInitElement {
+                    id,
+                    module_id,
+                    element_id,
+                } => {
+                    let packet = ClientPackets::ModuleInitElement(
+                        id,
+                        self.session.module_init_element(&module_id, &element_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ModuleAcceptUrl { id, module_id, url } => {
+                    // TODO: Error handlering for url
+                    let packet = ClientPackets::ModuleAcceptUrl(
+                        id,
+                        self.session
+                            .moduie_accept_url(&module_id, Url::parse(&url).unwrap()),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ModuleAcceptExtension {
+                    id,
+                    module_id,
+                    filename,
+                } => {
+                    let packet = ClientPackets::ModuleAcceptExtension(
+                        id,
+                        self.session.module_accept_extension(&module_id, &filename),
+                    );
+                    self.inner.send(packet, &addr);
                 }
                 ServerPackets::Tick => {}
             }

@@ -297,7 +297,18 @@ impl TSession for Box<dyn TDaemonSession> {
     }
 
     fn get_module_element_settings(&self, module_id: &ModuleId) -> Result<Data, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ModuleGetElementSettings {
+            id,
+            module_id: *module_id,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleGetElementSettings(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn set_module_element_settings(
@@ -305,7 +316,19 @@ impl TSession for Box<dyn TDaemonSession> {
         module_id: &ModuleId,
         data: Data,
     ) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ModuleSetElementSettings {
+            id,
+            module_id: *module_id,
+            to: data,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleSetElementSettings(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn module_init_location(
@@ -314,7 +337,20 @@ impl TSession for Box<dyn TDaemonSession> {
         location_id: &LocationId,
         data: FileOrData,
     ) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ModuleInitLocation {
+            id,
+            module_id: *module_id,
+            location_id: location_id.clone(),
+            data,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleInitLocation(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn module_init_element(
@@ -322,11 +358,35 @@ impl TSession for Box<dyn TDaemonSession> {
         module_id: &ModuleId,
         element_id: &ElementId,
     ) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ModuleInitElement {
+            id,
+            module_id: *module_id,
+            element_id: element_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleInitElement(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn moduie_accept_url(&self, module_id: &ModuleId, url: Url) -> Result<bool, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ModuleAcceptUrl {
+            id,
+            module_id: *module_id,
+            url: url.to_string(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleAcceptUrl(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn module_accept_extension(
@@ -334,7 +394,19 @@ impl TSession for Box<dyn TDaemonSession> {
         module_id: &ModuleId,
         filename: &str,
     ) -> Result<bool, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ModuleAcceptExtension {
+            id,
+            module_id: *module_id,
+            filename: filename.to_owned(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleAcceptExtension(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn module_step_element(
