@@ -3,11 +3,11 @@ use std::{ops::Range, path::PathBuf};
 use bytes_kman::prelude::*;
 use muzzman_lib::{
     prelude::{
-        Data, ElementId, ElementInfo, FileOrData, LocationId, LocationInfo, ModuleId, SessionEvent,
-        Value,
+        Data, ElementId, ElementInfo, Event, FileOrData, LocationId, LocationInfo, ModuleId,
+        SessionEvent, Value,
     },
     session::{Actions, SessionError},
-    types::Type,
+    types::{Type, ID},
 };
 
 // send
@@ -280,6 +280,45 @@ pub enum ServerPackets {
         id: u128,
         element_id: ElementId,
     },
+    ElementNotify {
+        id: u128,
+        element_id: ElementId,
+        event: Event,
+    },
+    ElementEmit {
+        id: u128,
+        element_id: ElementId,
+        event: Event,
+    },
+    ElementSubscribe {
+        id: u128,
+        element_id: ElementId,
+        to: ID,
+    },
+    ElementUnSubscribe {
+        id: u128,
+        element_id: ElementId,
+        to: ID,
+    },
+
+    CreateLocation {
+        id: u128,
+        name: String,
+        location_id: LocationId,
+    },
+    GetLocationsLen {
+        id: u128,
+        location_id: LocationId,
+    },
+    GetLocations {
+        id: u128,
+        location_id: LocationId,
+        range: Range<usize>,
+    },
+    DestroyLocation {
+        id: u128,
+        location_id: LocationId,
+    },
 
     Tick,
 }
@@ -353,6 +392,15 @@ pub enum ClientPackets {
     ElementResolvModule(u128, Result<bool, SessionError>),
     ElementWait(u128, Result<(), SessionError>),
     ElementGetInfo(u128, Result<ElementInfo, SessionError>),
+    ElementNotify(u128, Result<(), SessionError>),
+    ElementEmit(u128, Result<(), SessionError>),
+    ElementSubscribe(u128, Result<(), SessionError>),
+    ElementUnSubscribe(u128, Result<(), SessionError>),
+
+    CreateLocation(u128, Result<LocationId, SessionError>),
+    GetLocationsLen(u128, Result<usize, SessionError>),
+    GetLocations(u128, Result<Vec<LocationId>, SessionError>),
+    DestroyLocation(u128, Result<(), SessionError>),
 
     NewSessionEvent(SessionEvent),
 }
@@ -419,6 +467,14 @@ impl ClientPackets {
             ClientPackets::ElementGetEnabled(id, _) => *id,
             ClientPackets::ElementResolvModule(id, _) => *id,
             ClientPackets::ElementWait(id, _) => *id,
+            ClientPackets::ElementNotify(id, _) => *id,
+            ClientPackets::ElementEmit(id, _) => *id,
+            ClientPackets::ElementSubscribe(id, _) => *id,
+            ClientPackets::ElementUnSubscribe(id, _) => *id,
+            ClientPackets::CreateLocation(id, _) => *id,
+            ClientPackets::GetLocationsLen(id, _) => *id,
+            ClientPackets::GetLocations(id, _) => *id,
+            ClientPackets::DestroyLocation(id, _) => *id,
             ClientPackets::NewSessionEvent(_) => 0,
         }
     }

@@ -43,7 +43,7 @@ impl Daemon {
 
         let socket_fd = socket.as_raw_fd();
 
-        let mut poller = Poller::new()?;
+        let poller = Poller::new()?;
         poller.add(
             socket_fd,
             polling::Event {
@@ -63,7 +63,6 @@ impl Daemon {
 
         let inner_clone = inner.clone();
         session.callback = Some(Box::new(move |event| {
-            println!("Recived Event from localsession: {:?}", event);
             let clients = inner_clone.clients();
             for client in clients {
                 inner_clone.send(ClientPackets::NewSessionEvent(event.clone()), &client);
@@ -588,6 +587,95 @@ impl Daemon {
                         ClientPackets::ElementWait(id, self.session.element_wait(&element_id));
                     self.inner.send(packet, &addr)
                 }
+                ServerPackets::ElementNotify {
+                    id,
+                    element_id,
+                    event,
+                } => {
+                    let packet = ClientPackets::ElementNotify(
+                        id,
+                        self.session.element_notify(&element_id, event),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementEmit {
+                    id,
+                    element_id,
+                    event,
+                } => {
+                    let packet = ClientPackets::ElementEmit(
+                        id,
+                        self.session.element_emit(&element_id, event),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementSubscribe { id, element_id, to } => {
+                    let packet = ClientPackets::ElementSubscribe(
+                        id,
+                        self.session.element_subscribe(&element_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementUnSubscribe { id, element_id, to } => {
+                    let packet = ClientPackets::ElementUnSubscribe(
+                        id,
+                        self.session.element_unsubscribe(&element_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::CreateLocation {
+                    id,
+                    name,
+                    location_id,
+                } => {
+                    let packet = ClientPackets::CreateLocation(
+                        id,
+                        match self.session.create_location(&name, &location_id) {
+                            Ok(ok) => Ok(ok.id()),
+                            Err(err) => Err(err),
+                        },
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::GetLocationsLen { id, location_id } => {
+                    let packet = ClientPackets::GetLocationsLen(
+                        id,
+                        self.session.get_locations_len(&location_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::GetLocations {
+                    id,
+                    location_id,
+                    range,
+                } => {
+                    let packet = ClientPackets::GetLocations(
+                        id,
+                        match self.session.get_locations(&location_id, range) {
+                            Ok(ok) => {
+                                let mut tmp = Vec::with_capacity(ok.len());
+
+                                for k in ok {
+                                    tmp.push(k.id())
+                                }
+
+                                Ok(tmp)
+                            }
+                            Err(err) => Err(err),
+                        },
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::DestroyLocation { id, location_id } => {
+                    let packet = ClientPackets::DestroyLocation(
+                        id,
+                        match self.session.destroy_location(location_id) {
+                            Ok(_) => Ok(()),
+                            Err(err) => Err(err),
+                        },
+                    );
+                    self.inner.send(packet, &addr)
+                }
                 ServerPackets::Tick => {}
             }
         }
@@ -660,7 +748,7 @@ impl TDaemonInner for Arc<Mutex<DaemonInner>> {
             .unwrap()
             .clients
             .iter()
-            .map(|(_, addr)| addr.clone())
+            .map(|(_, addr)| *addr)
             .collect::<Vec<SocketAddr>>()
     }
 }

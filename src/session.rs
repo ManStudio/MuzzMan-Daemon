@@ -954,27 +954,101 @@ impl TSession for Box<dyn TDaemonSession> {
     }
 
     fn element_notify(&self, element_id: &ElementId, event: Event) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementNotify {
+            id,
+            element_id: element_id.clone(),
+            event,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementNotify(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_emit(&self, element_id: &ElementId, event: Event) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementEmit {
+            id,
+            element_id: element_id.clone(),
+            event,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementEmit(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_subscribe(&self, element_id: &ElementId, _ref: ID) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementSubscribe {
+            id,
+            element_id: element_id.clone(),
+            to: _ref,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementSubscribe(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_unsubscribe(&self, element_id: &ElementId, _ref: ID) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementUnSubscribe {
+            id,
+            element_id: element_id.clone(),
+            to: _ref,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementUnSubscribe(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn create_location(&self, name: &str, location_id: &LocationId) -> Result<LRef, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::CreateLocation {
+            id,
+            name: name.to_owned(),
+            location_id: location_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::CreateLocation(_, response)) = self.waiting_for(id) {
+            match response {
+                Ok(ok) => Ok(self.lref_get_or_add(ok)),
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn get_locations_len(&self, location_id: &LocationId) -> Result<usize, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::GetLocationsLen {
+            id,
+            location_id: location_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::GetLocationsLen(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn get_locations(
@@ -982,11 +1056,45 @@ impl TSession for Box<dyn TDaemonSession> {
         location_id: &LocationId,
         range: std::ops::Range<usize>,
     ) -> Result<Vec<LRef>, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::GetLocations {
+            id,
+            location_id: location_id.clone(),
+            range,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::GetLocations(_, response)) = self.waiting_for(id) {
+            match response {
+                Ok(ok) => {
+                    let mut tmp = Vec::with_capacity(ok.len());
+
+                    for k in ok {
+                        tmp.push(self.lref_get_or_add(k))
+                    }
+
+                    Ok(tmp)
+                }
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn destroy_location(&self, location_id: LocationId) -> Result<LRow, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::DestroyLocation { id, location_id };
+
+        self.send(packet);
+        if let Some(ClientPackets::DestroyLocation(_, response)) = self.waiting_for(id) {
+            match response {
+                Ok(_) => Err(SessionError::Custom("LRow Cannot be transfered!".into())),
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn get_default_location(&self) -> Result<LRef, SessionError> {
