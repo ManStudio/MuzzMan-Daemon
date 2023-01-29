@@ -259,6 +259,23 @@ pub enum ServerPackets {
         element_id: ElementId,
         to: bool,
     },
+    ElementGetEnabled {
+        id: u128,
+        element_id: ElementId,
+    },
+    ElementSetEnabled {
+        id: u128,
+        element_id: ElementId,
+        to: bool,
+    },
+    ElementResolvModule {
+        id: u128,
+        element_id: ElementId,
+    },
+    ElementWait {
+        id: u128,
+        element_id: ElementId,
+    },
     ElementGetInfo {
         id: u128,
         element_id: ElementId,
@@ -331,6 +348,10 @@ pub enum ClientPackets {
     ElementSetProgress(u128, Result<(), SessionError>),
     ElementGetShouldSave(u128, Result<bool, SessionError>),
     ElementSetShouldSave(u128, Result<(), SessionError>),
+    ElementGetEnabled(u128, Result<bool, SessionError>),
+    ElementSetEnabled(u128, Result<(), SessionError>),
+    ElementResolvModule(u128, Result<bool, SessionError>),
+    ElementWait(u128, Result<(), SessionError>),
     ElementGetInfo(u128, Result<ElementInfo, SessionError>),
 
     NewSessionEvent(SessionEvent),
@@ -394,6 +415,10 @@ impl ClientPackets {
             ClientPackets::ElementSetProgress(id, _) => *id,
             ClientPackets::ElementGetShouldSave(id, _) => *id,
             ClientPackets::ElementSetShouldSave(id, _) => *id,
+            ClientPackets::ElementSetEnabled(id, _) => *id,
+            ClientPackets::ElementGetEnabled(id, _) => *id,
+            ClientPackets::ElementResolvModule(id, _) => *id,
+            ClientPackets::ElementWait(id, _) => *id,
             ClientPackets::NewSessionEvent(_) => 0,
         }
     }

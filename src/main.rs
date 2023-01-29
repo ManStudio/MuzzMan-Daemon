@@ -554,6 +554,40 @@ impl Daemon {
                     );
                     self.inner.send(packet, &addr)
                 }
+                ServerPackets::ElementGetEnabled { id, element_id } => {
+                    let packet = ClientPackets::ElementGetEnabled(
+                        id,
+                        self.session.element_get_enabled(&element_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementSetEnabled { id, element_id, to } => {
+                    let packet = ClientPackets::ElementSetEnabled(
+                        id,
+                        self.session.element_set_enabled(&element_id, to, None),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementResolvModule { id, element_id } => {
+                    let packet = ClientPackets::ElementResolvModule(
+                        id,
+                        self.session.element_resolv_module(&element_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementWait { id, element_id } => {
+                    // TODO: Implement this better
+                    // This will block the daemon until the element is done
+                    // This is really bad because any request from other sessions will be ignored
+                    // and result into timeout
+                    // this is here because i'am lazy to makeit better with some event handler
+                    // if some one want to fix this go end do it
+                    //
+                    // Problem from 1/29/2023
+                    let packet =
+                        ClientPackets::ElementWait(id, self.session.element_wait(&element_id));
+                    self.inner.send(packet, &addr)
+                }
                 ServerPackets::Tick => {}
             }
         }
