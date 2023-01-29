@@ -863,7 +863,18 @@ impl TSession for Box<dyn TDaemonSession> {
     }
 
     fn element_get_enabled(&self, element_id: &ElementId) -> Result<bool, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementGetEnabled {
+            id,
+            element_id: element_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementGetEnabled(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_set_enabled(
@@ -872,15 +883,56 @@ impl TSession for Box<dyn TDaemonSession> {
         enabled: bool,
         storage: Option<Storage>,
     ) -> Result<(), SessionError> {
-        todo!()
+        if storage.is_some() {
+            // TODO: Find a method to implement this!
+            todo!()
+        }
+
+        let id = self.generate();
+        let packet = ServerPackets::ElementSetEnabled {
+            id,
+            element_id: element_id.clone(),
+            to: enabled,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementSetEnabled(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_resolv_module(&self, element_id: &ElementId) -> Result<bool, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementResolvModule {
+            id,
+            element_id: element_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementResolvModule(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_wait(&self, element_id: &ElementId) -> Result<(), SessionError> {
-        todo!()
+        // TODO: Fix daemon problem in ServerPackets::ElementWait
+
+        let id = self.generate();
+        let packet = ServerPackets::ElementWait {
+            id,
+            element_id: element_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementWait(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_get_element_info(
