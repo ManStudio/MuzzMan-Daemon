@@ -119,16 +119,6 @@ pub enum ServerPackets {
         filename: String,
     },
 
-    MoveElement {
-        id: u128,
-        element_id: ElementId,
-        location_id: LocationId,
-    },
-    DestroyElement {
-        id: u128,
-        element_id: ElementId,
-    },
-
     GetDefaultLocation {
         id: u128,
     },
@@ -160,6 +150,16 @@ pub enum ServerPackets {
         location_id: LocationId,
         name: String,
     },
+    MoveElement {
+        id: u128,
+        element_id: ElementId,
+        location_id: LocationId,
+    },
+    DestroyElement {
+        id: u128,
+        element_id: ElementId,
+    },
+
     ElementGetName {
         id: u128,
         element_id: ElementId,
@@ -186,6 +186,42 @@ pub enum ServerPackets {
         id: u128,
         element_id: ElementId,
         to: String,
+    },
+    ElementGetElementData {
+        id: u128,
+        element_id: ElementId,
+    },
+    ElementSetElementData {
+        id: u128,
+        element_id: ElementId,
+        to: Data,
+    },
+    ElementGetModuleData {
+        id: u128,
+        element_id: ElementId,
+    },
+    ElementSetModuleData {
+        id: u128,
+        element_id: ElementId,
+        to: Data,
+    },
+    ElementGetModule {
+        id: u128,
+        element_id: ElementId,
+    },
+    ElementSetModule {
+        id: u128,
+        element_id: ElementId,
+        module: Option<ModuleId>,
+    },
+    ElementGetStatuses {
+        id: u128,
+        element_id: ElementId,
+    },
+    ElementSetStatuses {
+        id: u128,
+        element_id: ElementId,
+        to: Vec<String>,
     },
     ElementGetInfo {
         id: u128,
@@ -243,6 +279,14 @@ pub enum ClientPackets {
     ElementSetDesc(u128, Result<(), SessionError>),
     ElementGetMeta(u128, Result<String, SessionError>),
     ElementSetMeta(u128, Result<(), SessionError>),
+    ElementGetElementData(u128, Result<Data, SessionError>),
+    ElementSetElementData(u128, Result<(), SessionError>),
+    ElementGetModuleData(u128, Result<Data, SessionError>),
+    ElementSetModuleData(u128, Result<(), SessionError>),
+    ElementGetModule(u128, Result<Option<ModuleId>, SessionError>),
+    ElementSetModule(u128, Result<(), SessionError>),
+    ElementGetStatuses(u128, Result<Vec<String>, SessionError>),
+    ElementSetStatuses(u128, Result<(), SessionError>),
     ElementGetInfo(u128, Result<ElementInfo, SessionError>),
 
     NewSessionEvent(SessionEvent),
@@ -290,6 +334,14 @@ impl ClientPackets {
             ClientPackets::ModuleAcceptExtension(id, _) => *id,
             ClientPackets::MoveElement(id, _) => *id,
             ClientPackets::DestroyElement(id, _) => *id,
+            ClientPackets::ElementGetElementData(id, _) => *id,
+            ClientPackets::ElementSetElementData(id, _) => *id,
+            ClientPackets::ElementGetModuleData(id, _) => *id,
+            ClientPackets::ElementSetModuleData(id, _) => *id,
+            ClientPackets::ElementGetModule(id, _) => *id,
+            ClientPackets::ElementSetModule(id, _) => *id,
+            ClientPackets::ElementGetStatuses(id, _) => *id,
+            ClientPackets::ElementSetStatuses(id, _) => *id,
             ClientPackets::NewSessionEvent(_) => 0,
         }
     }

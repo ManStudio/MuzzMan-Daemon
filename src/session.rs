@@ -577,7 +577,18 @@ impl TSession for Box<dyn TDaemonSession> {
     }
 
     fn element_get_element_data(&self, element_id: &ElementId) -> Result<Data, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementGetElementData {
+            id,
+            element_id: element_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementGetElementData(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_set_element_data(
@@ -585,11 +596,34 @@ impl TSession for Box<dyn TDaemonSession> {
         element_id: &ElementId,
         data: Data,
     ) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementSetElementData {
+            id,
+            element_id: element_id.clone(),
+            to: data,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementSetElementData(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_get_module_data(&self, element_id: &ElementId) -> Result<Data, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementGetModuleData {
+            id,
+            element_id: element_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementGetModuleData(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_set_module_data(
@@ -597,31 +631,95 @@ impl TSession for Box<dyn TDaemonSession> {
         element_id: &ElementId,
         data: Data,
     ) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementSetModuleData {
+            id,
+            element_id: element_id.clone(),
+            to: data,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementSetModuleData(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_get_module(&self, element_id: &ElementId) -> Result<Option<MRef>, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementGetModule {
+            id,
+            element_id: element_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementGetModule(_, response)) = self.waiting_for(id) {
+            match response {
+                Ok(ok) => match ok {
+                    Some(some) => Ok(Some(self.mref_get_or_add(some))),
+                    None => Ok(None),
+                },
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_set_module(
         &self,
-        element: &ElementId,
+        element_id: &ElementId,
         module: Option<ModuleId>,
     ) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementSetModule {
+            id,
+            element_id: element_id.clone(),
+            module,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementSetModule(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_get_statuses(&self, element_id: &ElementId) -> Result<Vec<String>, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementGetStatuses {
+            id,
+            element_id: element_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementGetStatuses(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_set_statuses(
         &self,
-        element: &ElementId,
+        element_id: &ElementId,
         statuses: Vec<String>,
     ) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementSetStatuses {
+            id,
+            element_id: element_id.clone(),
+            to: statuses,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementSetModule(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_get_status(&self, element_id: &ElementId) -> Result<usize, SessionError> {

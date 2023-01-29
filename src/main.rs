@@ -432,6 +432,72 @@ impl Daemon {
                     );
                     self.inner.send(packet, &addr)
                 }
+                ServerPackets::ElementGetElementData { id, element_id } => {
+                    let packet = ClientPackets::ElementGetElementData(
+                        id,
+                        self.session.element_get_element_data(&element_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementSetElementData { id, element_id, to } => {
+                    let packet = ClientPackets::ElementSetElementData(
+                        id,
+                        self.session.element_set_element_data(&element_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementGetModuleData { id, element_id } => {
+                    let packet = ClientPackets::ElementGetModuleData(
+                        id,
+                        self.session.element_get_module_data(&element_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementSetModuleData { id, element_id, to } => {
+                    let packet = ClientPackets::ElementSetModuleData(
+                        id,
+                        self.session.element_set_module_data(&element_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementGetModule { id, element_id } => {
+                    let packet = ClientPackets::ElementGetModule(
+                        id,
+                        match self.session.element_get_module(&element_id) {
+                            Ok(ok) => match ok {
+                                Some(some) => Ok(Some(some.id())),
+                                None => Ok(None),
+                            },
+                            Err(err) => Err(err),
+                        },
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementSetModule {
+                    id,
+                    element_id,
+                    module,
+                } => {
+                    let packet = ClientPackets::ElementSetModule(
+                        id,
+                        self.session.element_set_module(&element_id, module),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementGetStatuses { id, element_id } => {
+                    let packet = ClientPackets::ElementGetStatuses(
+                        id,
+                        self.session.element_get_statuses(&element_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementSetStatuses { id, element_id, to } => {
+                    let packet = ClientPackets::ElementSetStatuses(
+                        id,
+                        self.session.element_set_statuses(&element_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
                 ServerPackets::Tick => {}
             }
         }
