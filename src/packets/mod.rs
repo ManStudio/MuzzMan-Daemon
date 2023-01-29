@@ -223,6 +223,42 @@ pub enum ServerPackets {
         element_id: ElementId,
         to: Vec<String>,
     },
+    ElementGetStatus {
+        id: u128,
+        element_id: ElementId,
+    },
+    ElementSetStatus {
+        id: u128,
+        element_id: ElementId,
+        to: usize,
+    },
+    ElementGetData {
+        id: u128,
+        element_id: ElementId,
+    },
+    ElementSetData {
+        id: u128,
+        element_id: ElementId,
+        to: FileOrData,
+    },
+    ElementGetProgress {
+        id: u128,
+        element_id: ElementId,
+    },
+    ElementSetProgress {
+        id: u128,
+        element_id: ElementId,
+        to: f32,
+    },
+    ElementGetShouldSave {
+        id: u128,
+        element_id: ElementId,
+    },
+    ElementSetShouldSave {
+        id: u128,
+        element_id: ElementId,
+        to: bool,
+    },
     ElementGetInfo {
         id: u128,
         element_id: ElementId,
@@ -287,6 +323,14 @@ pub enum ClientPackets {
     ElementSetModule(u128, Result<(), SessionError>),
     ElementGetStatuses(u128, Result<Vec<String>, SessionError>),
     ElementSetStatuses(u128, Result<(), SessionError>),
+    ElementGetStatus(u128, Result<usize, SessionError>),
+    ElementSetStatus(u128, Result<(), SessionError>),
+    ElementGetData(u128, Result<FileOrData, SessionError>),
+    ElementSetData(u128, Result<(), SessionError>),
+    ElementGetProgress(u128, Result<f32, SessionError>),
+    ElementSetProgress(u128, Result<(), SessionError>),
+    ElementGetShouldSave(u128, Result<bool, SessionError>),
+    ElementSetShouldSave(u128, Result<(), SessionError>),
     ElementGetInfo(u128, Result<ElementInfo, SessionError>),
 
     NewSessionEvent(SessionEvent),
@@ -342,6 +386,14 @@ impl ClientPackets {
             ClientPackets::ElementSetModule(id, _) => *id,
             ClientPackets::ElementGetStatuses(id, _) => *id,
             ClientPackets::ElementSetStatuses(id, _) => *id,
+            ClientPackets::ElementGetStatus(id, _) => *id,
+            ClientPackets::ElementSetStatus(id, _) => *id,
+            ClientPackets::ElementGetData(id, _) => *id,
+            ClientPackets::ElementSetData(id, _) => *id,
+            ClientPackets::ElementGetProgress(id, _) => *id,
+            ClientPackets::ElementSetProgress(id, _) => *id,
+            ClientPackets::ElementGetShouldSave(id, _) => *id,
+            ClientPackets::ElementSetShouldSave(id, _) => *id,
             ClientPackets::NewSessionEvent(_) => 0,
         }
     }

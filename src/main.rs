@@ -498,6 +498,62 @@ impl Daemon {
                     );
                     self.inner.send(packet, &addr)
                 }
+                ServerPackets::ElementGetStatus { id, element_id } => {
+                    let packet = ClientPackets::ElementGetStatus(
+                        id,
+                        self.session.element_get_status(&element_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementSetStatus { id, element_id, to } => {
+                    let packet = ClientPackets::ElementSetStatus(
+                        id,
+                        self.session.element_set_status(&element_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementGetData { id, element_id } => {
+                    let packet = ClientPackets::ElementGetData(
+                        id,
+                        self.session.element_get_data(&element_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementSetData { id, element_id, to } => {
+                    let packet = ClientPackets::ElementSetData(
+                        id,
+                        self.session.element_set_data(&element_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementGetProgress { id, element_id } => {
+                    let packet = ClientPackets::ElementGetProgress(
+                        id,
+                        self.session.element_get_progress(&element_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementSetProgress { id, element_id, to } => {
+                    let packet = ClientPackets::ElementSetProgress(
+                        id,
+                        self.session.element_set_progress(&element_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementGetShouldSave { id, element_id } => {
+                    let packet = ClientPackets::ElementGetShouldSave(
+                        id,
+                        self.session.element_get_should_save(&element_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementSetShouldSave { id, element_id, to } => {
+                    let packet = ClientPackets::ElementSetShouldSave(
+                        id,
+                        self.session.element_set_should_save(&element_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
                 ServerPackets::Tick => {}
             }
         }

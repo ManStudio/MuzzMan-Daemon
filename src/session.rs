@@ -715,7 +715,7 @@ impl TSession for Box<dyn TDaemonSession> {
         };
 
         self.send(packet);
-        if let Some(ClientPackets::ElementSetModule(_, response)) = self.waiting_for(id) {
+        if let Some(ClientPackets::ElementSetStatuses(_, response)) = self.waiting_for(id) {
             response
         } else {
             Err(SessionError::ServerTimeOut)
@@ -723,7 +723,18 @@ impl TSession for Box<dyn TDaemonSession> {
     }
 
     fn element_get_status(&self, element_id: &ElementId) -> Result<usize, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementGetStatus {
+            id,
+            element_id: element_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementGetStatus(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_set_status(
@@ -731,11 +742,34 @@ impl TSession for Box<dyn TDaemonSession> {
         element_id: &ElementId,
         status: usize,
     ) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementSetStatus {
+            id,
+            element_id: element_id.clone(),
+            to: status,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementSetStatus(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_get_data(&self, element_id: &ElementId) -> Result<FileOrData, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementGetData {
+            id,
+            element_id: element_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementGetData(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_set_data(
@@ -743,11 +777,34 @@ impl TSession for Box<dyn TDaemonSession> {
         element_id: &ElementId,
         data: FileOrData,
     ) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementSetData {
+            id,
+            element_id: element_id.clone(),
+            to: data,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementSetData(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_get_progress(&self, element_id: &ElementId) -> Result<f32, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementGetProgress {
+            id,
+            element_id: element_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementGetProgress(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_set_progress(
@@ -755,19 +812,54 @@ impl TSession for Box<dyn TDaemonSession> {
         element_id: &ElementId,
         progress: f32,
     ) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementSetProgress {
+            id,
+            element_id: element_id.clone(),
+            to: progress,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementSetProgress(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_get_should_save(&self, element_id: &ElementId) -> Result<bool, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementGetShouldSave {
+            id,
+            element_id: element_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementGetShouldSave(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_set_should_save(
         &self,
-        element: &ElementId,
+        element_id: &ElementId,
         should_save: bool,
     ) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::ElementSetShouldSave {
+            id,
+            element_id: element_id.clone(),
+            to: should_save,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementSetShouldSave(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_get_enabled(&self, element_id: &ElementId) -> Result<bool, SessionError> {
