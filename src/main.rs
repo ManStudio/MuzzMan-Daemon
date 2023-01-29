@@ -676,6 +676,126 @@ impl Daemon {
                     );
                     self.inner.send(packet, &addr)
                 }
+                ServerPackets::MoveLocation {
+                    id,
+                    location_id,
+                    to,
+                } => {
+                    let packet = ClientPackets::MoveLocation(
+                        id,
+                        self.session.move_location(&location_id, &to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::LocationGetPath { id, location_id } => {
+                    let packet = ClientPackets::LocationGetPath(
+                        id,
+                        self.session.location_get_path(&location_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::LocationSetPath {
+                    id,
+                    location_id,
+                    to,
+                } => {
+                    let packet = ClientPackets::LocationSetPath(
+                        id,
+                        self.session.location_set_path(&location_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::LocationGetShouldSave { id, location_id } => {
+                    let packet = ClientPackets::LocationGetShouldSave(
+                        id,
+                        self.session.location_get_should_save(&location_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::LocationSetShouldSave {
+                    id,
+                    location_id,
+                    to,
+                } => {
+                    let packet = ClientPackets::LocationSetShouldSave(
+                        id,
+                        self.session.location_set_should_save(&location_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::LocationGetElementsLen { id, location_id } => {
+                    let packet = ClientPackets::LocationGetElementsLen(
+                        id,
+                        self.session.location_get_elements_len(&location_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::LocationGetElements {
+                    id,
+                    location_id,
+                    range,
+                } => {
+                    let packet = ClientPackets::LocationGetElements(
+                        id,
+                        match self.session.location_get_elements(&location_id, range) {
+                            Ok(ok) => {
+                                let mut tmp = Vec::with_capacity(ok.len());
+
+                                for k in ok {
+                                    tmp.push(k.id())
+                                }
+
+                                Ok(tmp)
+                            }
+                            Err(err) => Err(err),
+                        },
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::LocationNotify {
+                    id,
+                    location_id,
+                    event,
+                } => {
+                    let packet = ClientPackets::LocationNotify(
+                        id,
+                        self.session.location_notify(&location_id, event),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::LocationEmit {
+                    id,
+                    location_id,
+                    event,
+                } => {
+                    let packet = ClientPackets::LocationEmit(
+                        id,
+                        self.session.location_emit(&location_id, event),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::LocationSubscribe {
+                    id,
+                    location_id,
+                    to,
+                } => {
+                    let packet = ClientPackets::LocationSubscribe(
+                        id,
+                        self.session.location_subscribe(&location_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::LocationUnSubscribe {
+                    id,
+                    location_id,
+                    to,
+                } => {
+                    let packet = ClientPackets::LocationUnSubscribe(
+                        id,
+                        self.session.location_unsubscribe(&location_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
                 ServerPackets::Tick => {}
             }
         }

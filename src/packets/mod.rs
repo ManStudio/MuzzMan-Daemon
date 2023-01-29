@@ -319,6 +319,58 @@ pub enum ServerPackets {
         id: u128,
         location_id: LocationId,
     },
+    MoveLocation {
+        id: u128,
+        location_id: LocationId,
+        to: LocationId,
+    },
+    LocationGetPath {
+        id: u128,
+        location_id: LocationId,
+    },
+    LocationSetPath {
+        id: u128,
+        location_id: LocationId,
+        to: PathBuf,
+    },
+    LocationGetShouldSave {
+        id: u128,
+        location_id: LocationId,
+    },
+    LocationSetShouldSave {
+        id: u128,
+        location_id: LocationId,
+        to: bool,
+    },
+    LocationGetElementsLen {
+        id: u128,
+        location_id: LocationId,
+    },
+    LocationGetElements {
+        id: u128,
+        location_id: LocationId,
+        range: Range<usize>,
+    },
+    LocationNotify {
+        id: u128,
+        location_id: LocationId,
+        event: Event,
+    },
+    LocationEmit {
+        id: u128,
+        location_id: LocationId,
+        event: Event,
+    },
+    LocationSubscribe {
+        id: u128,
+        location_id: LocationId,
+        to: ID,
+    },
+    LocationUnSubscribe {
+        id: u128,
+        location_id: LocationId,
+        to: ID,
+    },
 
     Tick,
 }
@@ -355,12 +407,27 @@ pub enum ClientPackets {
     ModuleAcceptUrl(u128, Result<bool, SessionError>),
     ModuleAcceptExtension(u128, Result<bool, SessionError>),
 
+    CreateLocation(u128, Result<LocationId, SessionError>),
+    GetLocationsLen(u128, Result<usize, SessionError>),
+    GetLocations(u128, Result<Vec<LocationId>, SessionError>),
+    DestroyLocation(u128, Result<(), SessionError>),
+    MoveLocation(u128, Result<(), SessionError>),
     GetDefaultLocation(u128, Result<LocationId, SessionError>),
     LocationGetName(u128, Result<String, SessionError>),
     LocationSetName(u128, Result<(), SessionError>),
     LocationGetDesc(u128, Result<String, SessionError>),
     LocationSetDesc(u128, Result<(), SessionError>),
     LocationGetInfo(u128, Result<LocationInfo, SessionError>),
+    LocationGetPath(u128, Result<PathBuf, SessionError>),
+    LocationSetPath(u128, Result<(), SessionError>),
+    LocationGetShouldSave(u128, Result<bool, SessionError>),
+    LocationSetShouldSave(u128, Result<(), SessionError>),
+    LocationGetElementsLen(u128, Result<usize, SessionError>),
+    LocationGetElements(u128, Result<Vec<ElementId>, SessionError>),
+    LocationNotify(u128, Result<(), SessionError>),
+    LocationEmit(u128, Result<(), SessionError>),
+    LocationSubscribe(u128, Result<(), SessionError>),
+    LocationUnSubscribe(u128, Result<(), SessionError>),
 
     CreateElement(u128, Result<ElementId, SessionError>),
     MoveElement(u128, Result<(), SessionError>),
@@ -396,11 +463,6 @@ pub enum ClientPackets {
     ElementEmit(u128, Result<(), SessionError>),
     ElementSubscribe(u128, Result<(), SessionError>),
     ElementUnSubscribe(u128, Result<(), SessionError>),
-
-    CreateLocation(u128, Result<LocationId, SessionError>),
-    GetLocationsLen(u128, Result<usize, SessionError>),
-    GetLocations(u128, Result<Vec<LocationId>, SessionError>),
-    DestroyLocation(u128, Result<(), SessionError>),
 
     NewSessionEvent(SessionEvent),
 }
@@ -475,6 +537,17 @@ impl ClientPackets {
             ClientPackets::GetLocationsLen(id, _) => *id,
             ClientPackets::GetLocations(id, _) => *id,
             ClientPackets::DestroyLocation(id, _) => *id,
+            ClientPackets::MoveLocation(id, _) => *id,
+            ClientPackets::LocationGetPath(id, _) => *id,
+            ClientPackets::LocationSetPath(id, _) => *id,
+            ClientPackets::LocationGetShouldSave(id, _) => *id,
+            ClientPackets::LocationSetShouldSave(id, _) => *id,
+            ClientPackets::LocationGetElementsLen(id, _) => *id,
+            ClientPackets::LocationGetElements(id, _) => *id,
+            ClientPackets::LocationNotify(id, _) => *id,
+            ClientPackets::LocationEmit(id, _) => *id,
+            ClientPackets::LocationSubscribe(id, _) => *id,
+            ClientPackets::LocationUnSubscribe(id, _) => *id,
             ClientPackets::NewSessionEvent(_) => 0,
         }
     }

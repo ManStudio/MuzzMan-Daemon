@@ -1116,7 +1116,18 @@ impl TSession for Box<dyn TDaemonSession> {
     }
 
     fn move_location(&self, location_id: &LocationId, to: &LocationId) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::MoveLocation {
+            id,
+            location_id: location_id.clone(),
+            to: to.clone(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::MoveLocation(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn location_get_name(&self, location_id: &LocationId) -> Result<String, SessionError> {
@@ -1178,7 +1189,17 @@ impl TSession for Box<dyn TDaemonSession> {
     }
 
     fn location_get_path(&self, location_id: &LocationId) -> Result<PathBuf, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::LocationGetPath {
+            id,
+            location_id: location_id.clone(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationGetPath(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn location_set_path(
@@ -1186,7 +1207,18 @@ impl TSession for Box<dyn TDaemonSession> {
         location_id: &LocationId,
         path: PathBuf,
     ) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::LocationSetPath {
+            id,
+            location_id: location_id.clone(),
+            to: path,
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationSetPath(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn location_get_where_is(
@@ -1205,7 +1237,17 @@ impl TSession for Box<dyn TDaemonSession> {
     }
 
     fn location_get_should_save(&self, location_id: &LocationId) -> Result<bool, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::LocationGetShouldSave {
+            id,
+            location_id: location_id.clone(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationGetShouldSave(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn location_set_should_save(
@@ -1213,11 +1255,32 @@ impl TSession for Box<dyn TDaemonSession> {
         location_id: &LocationId,
         should_save: bool,
     ) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::LocationSetShouldSave {
+            id,
+            location_id: location_id.clone(),
+            to: should_save,
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationSetShouldSave(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn location_get_elements_len(&self, location_id: &LocationId) -> Result<usize, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::LocationGetElementsLen {
+            id,
+            location_id: location_id.clone(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationGetElementsLen(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn location_get_elements(
@@ -1225,7 +1288,29 @@ impl TSession for Box<dyn TDaemonSession> {
         location_id: &LocationId,
         range: std::ops::Range<usize>,
     ) -> Result<Vec<ERef>, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::LocationGetElements {
+            id,
+            location_id: location_id.clone(),
+            range,
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationGetElements(_, response)) = self.waiting_for(id) {
+            match response {
+                Ok(ok) => {
+                    let mut tmp = Vec::with_capacity(ok.len());
+
+                    for k in ok {
+                        tmp.push(self.eref_get_or_add(k))
+                    }
+
+                    Ok(tmp)
+                }
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn location_get_location_info(
@@ -1246,19 +1331,63 @@ impl TSession for Box<dyn TDaemonSession> {
     }
 
     fn location_notify(&self, location_id: &LocationId, event: Event) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::LocationNotify {
+            id,
+            location_id: location_id.clone(),
+            event,
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationNotify(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn location_emit(&self, location_id: &LocationId, event: Event) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::LocationEmit {
+            id,
+            location_id: location_id.clone(),
+            event,
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationEmit(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn location_subscribe(&self, location_id: &LocationId, _ref: ID) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::LocationSubscribe {
+            id,
+            location_id: location_id.clone(),
+            to: _ref,
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationSubscribe(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn location_unsubscribe(&self, location_id: &LocationId, _ref: ID) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::LocationUnSubscribe {
+            id,
+            location_id: location_id.clone(),
+            to: _ref,
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationUnSubscribe(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn get_module_ref(&self, id: &ModuleId) -> Result<MRef, SessionError> {
