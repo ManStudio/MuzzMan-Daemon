@@ -289,81 +289,81 @@ impl Daemon {
                 }
                 ServerPackets::ModuleGetName { id, module_id } => {
                     let packet =
-                        ClientPackets::ModuleGetName(id, self.session.get_module_name(&module_id));
+                        ClientPackets::ModuleGetName(id, self.session.module_get_name(&module_id));
                     self.inner.send(packet, &addr)
                 }
                 ServerPackets::ModuleSetName { id, module_id, to } => {
                     let packet = ClientPackets::ModuleSetName(
                         id,
-                        self.session.set_module_name(&module_id, to),
+                        self.session.module_set_name(&module_id, to),
                     );
                     self.inner.send(packet, &addr);
                 }
                 ServerPackets::ModuleGetDefaultName { id, module_id } => {
-                    let packet = ClientPackets::ModuleDefaultName(
+                    let packet = ClientPackets::ModuleGetDefaultName(
                         id,
-                        self.session.default_module_name(&module_id),
+                        self.session.module_get_default_name(&module_id),
                     );
                     self.inner.send(packet, &addr)
                 }
                 ServerPackets::ModuleGetDesc { id, module_id } => {
                     let packet =
-                        ClientPackets::ModuleGetDesc(id, self.session.get_module_desc(&module_id));
+                        ClientPackets::ModuleGetDesc(id, self.session.module_get_desc(&module_id));
                     self.inner.send(packet, &addr)
                 }
                 ServerPackets::ModuleSetDesc { id, module_id, to } => {
                     let packet = ClientPackets::ModuleSetDesc(
                         id,
-                        self.session.set_module_desc(&module_id, to),
+                        self.session.module_set_desc(&module_id, to),
                     );
                     self.inner.send(packet, &addr);
                 }
                 ServerPackets::ModuleGetDefaultDesc { id, module_id } => {
-                    let packet = ClientPackets::ModuleDefaultDesc(
+                    let packet = ClientPackets::ModuleGetDefaultDesc(
                         id,
-                        self.session.default_module_desc(&module_id),
+                        self.session.module_get_default_desc(&module_id),
                     );
                     self.inner.send(packet, &addr)
                 }
                 ServerPackets::ModuleGetProxy { id, module_id } => {
                     let packet = ClientPackets::ModuleGetProxy(
                         id,
-                        self.session.get_module_proxy(&module_id),
+                        self.session.module_get_proxy(&module_id),
                     );
                     self.inner.send(packet, &addr)
                 }
                 ServerPackets::ModuleSetProxy { id, module_id, to } => {
                     let packet = ClientPackets::ModuleSetProxy(
                         id,
-                        self.session.set_module_proxy(&module_id, to),
+                        self.session.module_set_proxy(&module_id, to),
                     );
                     self.inner.send(packet, &addr)
                 }
                 ServerPackets::ModuleGetSettings { id, module_id } => {
                     let packet = ClientPackets::ModuleGetSettings(
                         id,
-                        self.session.get_module_settings(&module_id),
+                        self.session.module_get_settings(&module_id),
                     );
                     self.inner.send(packet, &addr)
                 }
                 ServerPackets::ModuleSetSettings { id, module_id, to } => {
                     let packet = ClientPackets::ModuleSetSettings(
                         id,
-                        self.session.set_module_settings(&module_id, to),
+                        self.session.module_set_settings(&module_id, to),
                     );
                     self.inner.send(packet, &addr)
                 }
                 ServerPackets::ModuleGetElementSettings { id, module_id } => {
                     let packet = ClientPackets::ModuleGetElementSettings(
                         id,
-                        self.session.get_module_element_settings(&module_id),
+                        self.session.module_get_element_settings(&module_id),
                     );
                     self.inner.send(packet, &addr);
                 }
                 ServerPackets::ModuleSetElementSettings { id, module_id, to } => {
                     let packet = ClientPackets::ModuleSetElementSettings(
                         id,
-                        self.session.set_module_element_settings(&module_id, to),
+                        self.session.module_set_element_settings(&module_id, to),
                     );
                     self.inner.send(packet, &addr)
                 }

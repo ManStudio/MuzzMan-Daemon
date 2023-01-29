@@ -142,7 +142,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn get_module_name(&self, module_id: &ModuleId) -> Result<String, SessionError> {
+    fn module_get_name(&self, module_id: &ModuleId) -> Result<String, SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleGetName {
             id,
@@ -157,7 +157,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn set_module_name(&self, module_id: &ModuleId, name: String) -> Result<(), SessionError> {
+    fn module_set_name(&self, module_id: &ModuleId, name: String) -> Result<(), SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleSetName {
             id,
@@ -173,7 +173,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn default_module_name(&self, module_id: &ModuleId) -> Result<(), SessionError> {
+    fn module_get_default_name(&self, module_id: &ModuleId) -> Result<String, SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleGetDefaultName {
             id,
@@ -181,14 +181,14 @@ impl TSession for Box<dyn TDaemonSession> {
         };
 
         self.send(packet);
-        if let Some(ClientPackets::ModuleDefaultName(_, response)) = self.waiting_for(id) {
+        if let Some(ClientPackets::ModuleGetDefaultName(_, response)) = self.waiting_for(id) {
             response
         } else {
             Err(SessionError::ServerTimeOut)
         }
     }
 
-    fn get_module_desc(&self, module_id: &ModuleId) -> Result<String, SessionError> {
+    fn module_get_desc(&self, module_id: &ModuleId) -> Result<String, SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleGetDesc {
             id,
@@ -203,7 +203,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn set_module_desc(&self, module_id: &ModuleId, desc: String) -> Result<(), SessionError> {
+    fn module_set_desc(&self, module_id: &ModuleId, desc: String) -> Result<(), SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleSetDesc {
             id,
@@ -219,7 +219,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn default_module_desc(&self, module_id: &ModuleId) -> Result<(), SessionError> {
+    fn module_get_default_desc(&self, module_id: &ModuleId) -> Result<String, SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleGetDefaultDesc {
             id,
@@ -227,14 +227,14 @@ impl TSession for Box<dyn TDaemonSession> {
         };
 
         self.send(packet);
-        if let Some(ClientPackets::ModuleDefaultDesc(_, response)) = self.waiting_for(id) {
+        if let Some(ClientPackets::ModuleGetDefaultDesc(_, response)) = self.waiting_for(id) {
             response
         } else {
             Err(SessionError::ServerTimeOut)
         }
     }
 
-    fn get_module_proxy(&self, module_id: &ModuleId) -> Result<usize, SessionError> {
+    fn module_get_proxy(&self, module_id: &ModuleId) -> Result<usize, SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleGetProxy {
             id,
@@ -249,7 +249,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn set_module_proxy(&self, module_id: &ModuleId, proxy: usize) -> Result<(), SessionError> {
+    fn module_set_proxy(&self, module_id: &ModuleId, proxy: usize) -> Result<(), SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleSetProxy {
             id,
@@ -265,7 +265,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn get_module_settings(&self, module_id: &ModuleId) -> Result<Data, SessionError> {
+    fn module_get_settings(&self, module_id: &ModuleId) -> Result<Data, SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleGetSettings {
             id,
@@ -280,7 +280,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn set_module_settings(&self, module_id: &ModuleId, data: Data) -> Result<(), SessionError> {
+    fn module_set_settings(&self, module_id: &ModuleId, data: Data) -> Result<(), SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleSetSettings {
             id,
@@ -296,7 +296,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn get_module_element_settings(&self, module_id: &ModuleId) -> Result<Data, SessionError> {
+    fn module_get_element_settings(&self, module_id: &ModuleId) -> Result<Data, SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleGetElementSettings {
             id,
@@ -311,7 +311,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn set_module_element_settings(
+    fn module_set_element_settings(
         &self,
         module_id: &ModuleId,
         data: Data,
@@ -413,9 +413,9 @@ impl TSession for Box<dyn TDaemonSession> {
         &self,
         module_id: &ModuleId,
         element_id: &ElementId,
-        control_flow: &mut ControlFlow,
-        storage: &mut Storage,
-    ) -> Result<(), SessionError> {
+        control_flow: ControlFlow,
+        storage: Storage,
+    ) -> Result<(ControlFlow, Storage), SessionError> {
         todo!()
     }
 
@@ -423,9 +423,9 @@ impl TSession for Box<dyn TDaemonSession> {
         &self,
         module_id: &ModuleId,
         location_id: &LocationId,
-        control_flow: &mut ControlFlow,
-        storage: &mut Storage,
-    ) -> Result<(), SessionError> {
+        control_flow: ControlFlow,
+        storage: Storage,
+    ) -> Result<(ControlFlow, Storage), SessionError> {
         todo!()
     }
 
