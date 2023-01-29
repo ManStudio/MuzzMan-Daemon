@@ -119,6 +119,16 @@ pub enum ServerPackets {
         filename: String,
     },
 
+    MoveElement {
+        id: u128,
+        element_id: ElementId,
+        location_id: LocationId,
+    },
+    DestroyElement {
+        id: u128,
+        element_id: ElementId,
+    },
+
     GetDefaultLocation {
         id: u128,
     },
@@ -225,6 +235,8 @@ pub enum ClientPackets {
     LocationGetInfo(u128, Result<LocationInfo, SessionError>),
 
     CreateElement(u128, Result<ElementId, SessionError>),
+    MoveElement(u128, Result<(), SessionError>),
+    DestroyElement(u128, Result<(), SessionError>),
     ElementGetName(u128, Result<String, SessionError>),
     ElementSetName(u128, Result<(), SessionError>),
     ElementGetDesc(u128, Result<String, SessionError>),
@@ -276,6 +288,8 @@ impl ClientPackets {
             ClientPackets::ModuleInitElement(id, _) => *id,
             ClientPackets::ModuleAcceptUrl(id, _) => *id,
             ClientPackets::ModuleAcceptExtension(id, _) => *id,
+            ClientPackets::MoveElement(id, _) => *id,
+            ClientPackets::DestroyElement(id, _) => *id,
             ClientPackets::NewSessionEvent(_) => 0,
         }
     }

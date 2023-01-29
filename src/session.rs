@@ -453,11 +453,34 @@ impl TSession for Box<dyn TDaemonSession> {
         element: &ElementId,
         location_id: &LocationId,
     ) -> Result<(), SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::MoveElement {
+            id,
+            element_id: element.clone(),
+            location_id: location_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::MoveElement(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn destroy_element(&self, element_id: ElementId) -> Result<ERow, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::DestroyElement { id, element_id };
+
+        self.send(packet);
+        if let Some(ClientPackets::DestroyElement(_, response)) = self.waiting_for(id) {
+            match response {
+                Ok(_) => Err(SessionError::Custom("Cannot Transfer ERow".into())),
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn element_get_name(&self, element_id: &ElementId) -> Result<String, SessionError> {

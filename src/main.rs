@@ -411,6 +411,27 @@ impl Daemon {
                     );
                     self.inner.send(packet, &addr);
                 }
+                ServerPackets::MoveElement {
+                    id,
+                    element_id,
+                    location_id,
+                } => {
+                    let packet = ClientPackets::MoveElement(
+                        id,
+                        self.session.move_element(&element_id, &location_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::DestroyElement { id, element_id } => {
+                    let packet = ClientPackets::DestroyElement(
+                        id,
+                        match self.session.destroy_element(element_id) {
+                            Ok(_) => Ok(()),
+                            Err(err) => Err(err),
+                        },
+                    );
+                    self.inner.send(packet, &addr)
+                }
                 ServerPackets::Tick => {}
             }
         }
