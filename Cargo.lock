@@ -135,7 +135,6 @@ dependencies = [
  "dirs",
  "muzzman-lib",
  "polling",
- "rand",
 ]
 
 [[package]]

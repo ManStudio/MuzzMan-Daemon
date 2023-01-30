@@ -27,8 +27,8 @@ pub struct DaemonSession {
 
 impl DaemonSession {
     pub fn new() -> Result<Self, std::io::Error> {
-        let conn = UdpSocket::bind(format!("0.0.0.0:{}", rand::random::<u16>()))?;
-        conn.connect("0.0.0.0:2118")?;
+        let conn = UdpSocket::bind("127.0.0.1:0")?;
+        conn.connect("127.0.0.1:2118")?;
         let _ = conn.set_read_timeout(Some(Duration::new(10, 0)));
         Ok(Self {
             conn,

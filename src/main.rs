@@ -37,7 +37,7 @@ unsafe impl Send for Daemon {}
 
 impl Daemon {
     pub fn new() -> Result<Self, std::io::Error> {
-        let socket_addr = SocketAddr::from_str("0.0.0.0:2118").unwrap();
+        let socket_addr = SocketAddr::from_str("127.0.0.1:2118").unwrap();
         let socket = UdpSocket::bind(socket_addr).unwrap();
         socket.set_nonblocking(true).unwrap();
 

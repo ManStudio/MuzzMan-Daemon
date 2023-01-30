@@ -13,8 +13,6 @@ path = "./examples/get_location_info.rs"
 
 [dependencies]
 bytes-kman = "0.1.18"
-# tokio = {version = "1.24.2", features = ["full"]}
 muzzman-lib = {git = "https://github.com/ManStudio/MuzzMan-Lib"}
 dirs = "4.0.0"
-rand = "0.8.5"
 polling = "2.5.2"
