@@ -14,6 +14,8 @@ pub mod daemon;
 pub mod packets;
 pub mod session;
 
+pub const DAEMON_PORT: u16 = 2118;
+
 pub mod prelude {
     pub use crate::DaemonSession;
     pub use muzzman_lib::prelude::*;
@@ -31,7 +33,7 @@ pub struct DaemonSession {
 impl DaemonSession {
     pub fn new() -> Result<Self, std::io::Error> {
         let conn = UdpSocket::bind("127.0.0.1:0")?;
-        conn.connect("127.0.0.1:2118")?;
+        conn.connect(format!("127.0.0.1:{DAEMON_PORT}"))?;
         let _ = conn.set_read_timeout(Some(Duration::new(10, 0)));
         Ok(Self {
             conn,

@@ -1,12 +1,16 @@
 use std::{
     net::{SocketAddr, UdpSocket},
     os::fd::AsRawFd,
-    str::FromStr,
     sync::{Arc, Mutex},
     time::{Duration, SystemTime},
 };
 
-use crate::packets::{ClientPackets, ServerPackets};
+const CLIENT_TIMEOUT: Duration = Duration::new(10, 0);
+
+use crate::{
+    packets::{ClientPackets, ServerPackets},
+    DAEMON_PORT,
+};
 use bytes_kman::TBytes;
 use muzzman_lib::{
     prelude::{TElement, TLocation, TModuleInfo, Url},
@@ -32,8 +36,7 @@ unsafe impl Send for Daemon {}
 
 impl Daemon {
     pub fn new() -> Result<Self, std::io::Error> {
-        let socket_addr = SocketAddr::from_str("127.0.0.1:2118").unwrap();
-        let socket = UdpSocket::bind(socket_addr).unwrap();
+        let socket = UdpSocket::bind(format!("127.0.0.1:{DAEMON_PORT}")).unwrap();
         socket.set_nonblocking(true).unwrap();
 
         let socket_fd = socket.as_raw_fd();
@@ -854,7 +857,7 @@ impl TDaemonInner for Arc<Mutex<DaemonInner>> {
         self.lock()
             .unwrap()
             .clients
-            .retain(|(time, _)| time.elapsed().unwrap() > Duration::new(5, 0));
+            .retain(|(time, _)| time.elapsed().unwrap() > CLIENT_TIMEOUT);
     }
 
     fn clients(&self) -> Vec<SocketAddr> {
