@@ -1,5 +1,4 @@
-use muzzman_daemon::DaemonSession;
-use muzzman_lib::prelude::*;
+use muzzman_daemon::prelude::*;
 
 fn main() {
     let daemon = DaemonSession::new().unwrap();

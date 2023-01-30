@@ -14,6 +14,11 @@ pub mod daemon;
 pub mod packets;
 pub mod session;
 
+pub mod prelude {
+    pub use crate::DaemonSession;
+    pub use muzzman_lib::prelude::*;
+}
+
 pub struct DaemonSession {
     pub conn: UdpSocket,
     pub packets: Vec<ClientPackets>,
