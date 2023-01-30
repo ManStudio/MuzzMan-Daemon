@@ -18,6 +18,7 @@ pub mod session;
 pub const DAEMON_PORT: u16 = 2118;
 
 pub mod prelude {
+    pub use crate::common::get_modules;
     pub use crate::DaemonSession;
     pub use muzzman_lib::prelude::*;
 }
