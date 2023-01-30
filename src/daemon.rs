@@ -205,7 +205,7 @@ impl Daemon {
                 ServerPackets::ElementGetInfo { id, element_id } => {
                     let packet = ClientPackets::ElementGetInfo(
                         id,
-                        self.session.element_get_element_info(&element_id),
+                        Box::new(self.session.element_get_element_info(&element_id)),
                     );
                     self.inner.send(packet, &addr);
                 }
@@ -336,7 +336,7 @@ impl Daemon {
                 ServerPackets::ModuleGetSettings { id, module_id } => {
                     let packet = ClientPackets::ModuleGetSettings(
                         id,
-                        self.session.module_get_settings(&module_id),
+                        Box::new(self.session.module_get_settings(&module_id)),
                     );
                     self.inner.send(packet, &addr)
                 }

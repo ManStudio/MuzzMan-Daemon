@@ -271,7 +271,7 @@ impl TSession for Box<dyn TDaemonSession> {
 
         self.send(packet);
         if let Some(ClientPackets::ModuleGetSettings(_, response)) = self.waiting_for(id) {
-            response
+            *response
         } else {
             Err(SessionError::ServerTimeOut)
         }
@@ -944,7 +944,7 @@ impl TSession for Box<dyn TDaemonSession> {
 
         self.send(packet);
         if let Some(ClientPackets::ElementGetInfo(_, response)) = self.waiting_for(id) {
-            response
+            *response
         } else {
             Err(SessionError::ServerTimeOut)
         }

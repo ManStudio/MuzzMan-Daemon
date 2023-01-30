@@ -375,6 +375,8 @@ pub enum ServerPackets {
     Tick,
 }
 
+pub type Actions = Vec<(String, ModuleId, Vec<(String, Value)>)>;
+
 // recv
 #[derive(Clone, Debug, Bytes)]
 pub enum ClientPackets {
@@ -382,10 +384,7 @@ pub enum ClientPackets {
     RemoveModule(u128, Result<(), SessionError>),
 
     GetActionsLen(u128, Result<usize, SessionError>),
-    GetActions(
-        u128,
-        Result<Vec<(String, ModuleId, Vec<(String, Value)>)>, SessionError>,
-    ),
+    GetActions(u128, Result<Actions, SessionError>),
     RunAction(u128, Result<(), SessionError>),
 
     GetModulesLen(u128, Result<usize, SessionError>),
@@ -398,7 +397,7 @@ pub enum ClientPackets {
     ModuleGetDefaultDesc(u128, Result<String, SessionError>),
     ModuleGetProxy(u128, Result<usize, SessionError>),
     ModuleSetProxy(u128, Result<(), SessionError>),
-    ModuleGetSettings(u128, Result<Data, SessionError>),
+    ModuleGetSettings(u128, Box<Result<Data, SessionError>>),
     ModuleSetSettings(u128, Result<(), SessionError>),
     ModuleGetElementSettings(u128, Result<Data, SessionError>),
     ModuleSetElementSettings(u128, Result<(), SessionError>),
@@ -458,7 +457,7 @@ pub enum ClientPackets {
     ElementSetEnabled(u128, Result<(), SessionError>),
     ElementResolvModule(u128, Result<bool, SessionError>),
     ElementWait(u128, Result<(), SessionError>),
-    ElementGetInfo(u128, Result<ElementInfo, SessionError>),
+    ElementGetInfo(u128, Box<Result<ElementInfo, SessionError>>),
     ElementNotify(u128, Result<(), SessionError>),
     ElementEmit(u128, Result<(), SessionError>),
     ElementSubscribe(u128, Result<(), SessionError>),
