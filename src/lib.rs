@@ -2,6 +2,7 @@ use std::{
     net::UdpSocket,
     ops::{AddAssign, Sub},
     sync::{Arc, RwLock},
+    thread::{self, JoinHandle},
     time::{Duration, SystemTime},
 };
 
@@ -28,12 +29,17 @@ pub struct DaemonSession {
     pub locations_refs: Vec<LRef>,
     pub element_refs: Vec<ERef>,
     pub module_refs: Vec<MRef>,
+    pub watcher_thread: JoinHandle<()>,
 }
+
+unsafe impl Send for DaemonSession {}
+unsafe impl Sync for DaemonSession {}
 
 impl DaemonSession {
     pub fn new() -> Result<Self, std::io::Error> {
         let conn = UdpSocket::bind("127.0.0.1:0")?;
         conn.connect(format!("127.0.0.1:{DAEMON_PORT}"))?;
+        let _ = conn.set_nonblocking(true);
         let _ = conn.set_read_timeout(Some(Duration::new(10, 0)));
         Ok(Self {
             conn,
@@ -42,6 +48,7 @@ impl DaemonSession {
             locations_refs: Vec::new(),
             element_refs: Vec::new(),
             module_refs: Vec::new(),
+            watcher_thread: thread::spawn(|| {}),
         })
     }
 
@@ -97,8 +104,45 @@ impl DaemonSession {
         }
     }
 
+    pub fn gc_refs(&mut self) {
+        self.module_refs.retain(|mref| {
+            let count = Arc::strong_count(mref);
+            count > 1
+        });
+
+        self.locations_refs.retain(|lref| {
+            let count = Arc::strong_count(lref);
+            count > 1
+        });
+
+        self.element_refs.retain(|eref| {
+            let count = Arc::strong_count(eref);
+            count > 1
+        });
+    }
+
     pub fn create_session(self) -> Box<dyn TSession> {
-        Box::new(Box::new(Arc::new(RwLock::new(self))) as Box<dyn TDaemonSession>)
+        let s = Arc::new(RwLock::new(self));
+
+        let sc = s.clone();
+
+        s.write().unwrap().watcher_thread = thread::spawn(move || {
+            let sc = sc;
+            loop {
+                thread::sleep(Duration::new(1, 0));
+                let count = Arc::strong_count(&sc);
+                sc.write().unwrap().gc_refs();
+                if count == 1 {
+                    break;
+                }
+                sc.pull_packets();
+                let mut bytes = ServerPackets::Tick.to_bytes();
+                bytes.reverse();
+                let _ = sc.read().unwrap().conn.send(&bytes);
+            }
+        });
+
+        Box::new(Box::new(s) as Box<dyn TDaemonSession>)
     }
 }
 

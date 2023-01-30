@@ -5,7 +5,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-const CLIENT_TIMEOUT: Duration = Duration::new(10, 0);
+const CLIENT_TIMEOUT: Duration = Duration::new(3, 0);
 
 use crate::{
     packets::{ClientPackets, ServerPackets},
