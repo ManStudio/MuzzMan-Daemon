@@ -6,7 +6,7 @@ use muzzman_lib::{
         Data, ElementId, ElementInfo, Event, FileOrData, LocationId, LocationInfo, ModuleId,
         SessionEvent, Value,
     },
-    session::{Actions, SessionError},
+    session::SessionError,
     types::{Type, ID},
 };
 

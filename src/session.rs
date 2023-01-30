@@ -1,7 +1,4 @@
-use std::{
-    path::PathBuf,
-    sync::{Arc, RwLock},
-};
+use std::path::PathBuf;
 
 use crate::{
     packets::{ClientPackets, ServerPackets},
@@ -42,15 +39,15 @@ impl TSession for Box<dyn TDaemonSession> {
 
     fn register_action(
         &self,
-        module_id: &ModuleId,
-        name: String,
-        values: Vec<(String, Value)>,
-        callback: fn(MRef, values: Vec<Type>),
+        _module_id: &ModuleId,
+        _name: String,
+        _values: Vec<(String, Value)>,
+        _callback: fn(MRef, values: Vec<Type>),
     ) -> Result<(), SessionError> {
         todo!()
     }
 
-    fn remove_action(&self, module_id: &ModuleId, name: String) -> Result<(), SessionError> {
+    fn remove_action(&self, _module_id: &ModuleId, _name: String) -> Result<(), SessionError> {
         todo!()
     }
 
@@ -411,20 +408,20 @@ impl TSession for Box<dyn TDaemonSession> {
 
     fn module_step_element(
         &self,
-        module_id: &ModuleId,
-        element_id: &ElementId,
-        control_flow: ControlFlow,
-        storage: Storage,
+        _module_id: &ModuleId,
+        _element_id: &ElementId,
+        _control_flow: ControlFlow,
+        _storage: Storage,
     ) -> Result<(ControlFlow, Storage), SessionError> {
         todo!()
     }
 
     fn module_step_location(
         &self,
-        module_id: &ModuleId,
-        location_id: &LocationId,
-        control_flow: ControlFlow,
-        storage: Storage,
+        _module_id: &ModuleId,
+        _location_id: &LocationId,
+        _control_flow: ControlFlow,
+        _storage: Storage,
     ) -> Result<(ControlFlow, Storage), SessionError> {
         todo!()
     }
@@ -1223,15 +1220,15 @@ impl TSession for Box<dyn TDaemonSession> {
 
     fn location_get_where_is(
         &self,
-        location_id: &LocationId,
+        _location_id: &LocationId,
     ) -> Result<WhereIsLocation, SessionError> {
         todo!()
     }
 
     fn location_set_where_is(
         &self,
-        location_id: &LocationId,
-        where_is: WhereIsLocation,
+        _location_id: &LocationId,
+        _where_is: WhereIsLocation,
     ) -> Result<(), SessionError> {
         todo!()
     }
