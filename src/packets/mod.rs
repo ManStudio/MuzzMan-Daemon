@@ -118,6 +118,10 @@ pub enum ServerPackets {
         module_id: ModuleId,
         filename: String,
     },
+    ModuleAcceptedProtocols {
+        id: u128,
+        module_id: ModuleId,
+    },
 
     GetDefaultLocation {
         id: u128,
@@ -187,6 +191,16 @@ pub enum ServerPackets {
         element_id: ElementId,
         to: String,
     },
+    ElementGetUrl {
+        id: u128,
+        element_id: ElementId,
+    },
+    ElementSetUrl {
+        id: u128,
+        element_id: ElementId,
+        to: Option<String>,
+    },
+
     ElementGetElementData {
         id: u128,
         element_id: ElementId,
@@ -405,6 +419,7 @@ pub enum ClientPackets {
     ModuleInitElement(u128, Result<(), SessionError>),
     ModuleAcceptUrl(u128, Result<bool, SessionError>),
     ModuleAcceptExtension(u128, Result<bool, SessionError>),
+    ModuleAcceptedProtocols(u128, Result<Vec<String>, SessionError>),
 
     CreateLocation(u128, Result<LocationId, SessionError>),
     GetLocationsLen(u128, Result<usize, SessionError>),
@@ -437,6 +452,8 @@ pub enum ClientPackets {
     ElementSetDesc(u128, Result<(), SessionError>),
     ElementGetMeta(u128, Result<String, SessionError>),
     ElementSetMeta(u128, Result<(), SessionError>),
+    ElementGetUrl(u128, Result<Option<String>, SessionError>),
+    ElementSetUrl(u128, Result<(), SessionError>),
     ElementGetElementData(u128, Result<Data, SessionError>),
     ElementSetElementData(u128, Result<(), SessionError>),
     ElementGetModuleData(u128, Result<Data, SessionError>),
@@ -547,6 +564,9 @@ impl ClientPackets {
             ClientPackets::LocationEmit(id, _) => *id,
             ClientPackets::LocationSubscribe(id, _) => *id,
             ClientPackets::LocationUnSubscribe(id, _) => *id,
+            ClientPackets::ModuleAcceptedProtocols(id, _) => *id,
+            ClientPackets::ElementGetUrl(id, _) => *id,
+            ClientPackets::ElementSetUrl(id, _) => *id,
             ClientPackets::NewSessionEvent(_) => 0,
         }
     }
