@@ -370,7 +370,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn moduie_accept_url(&self, module_id: &ModuleId, url: Url) -> Result<bool, SessionError> {
+    fn module_accept_url(&self, module_id: &ModuleId, url: String) -> Result<bool, SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleAcceptUrl {
             id,
@@ -400,6 +400,21 @@ impl TSession for Box<dyn TDaemonSession> {
 
         self.send(packet);
         if let Some(ClientPackets::ModuleAcceptExtension(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn module_accepted_protocols(&self, module_id: &ModuleId) -> Result<Vec<String>, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::ModuleAcceptedProtocols {
+            id,
+            module_id: module_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleAcceptedProtocols(_, response)) = self.waiting_for(id) {
             response
         } else {
             Err(SessionError::ServerTimeOut)
@@ -567,6 +582,41 @@ impl TSession for Box<dyn TDaemonSession> {
 
         self.send(packet);
         if let Some(ClientPackets::ElementSetMeta(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn element_get_url(&self, element_id: &ElementId) -> Result<Option<String>, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::ElementGetUrl {
+            id,
+            element_id: element_id.clone(),
+        };
+        self.send(packet);
+
+        if let Some(ClientPackets::ElementGetUrl(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn element_set_url(
+        &self,
+        element_id: &ElementId,
+        url: Option<String>,
+    ) -> Result<(), SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::ElementSetUrl {
+            id,
+            element_id: element_id.clone(),
+            to: url,
+        };
+        self.send(packet);
+
+        if let Some(ClientPackets::ElementSetUrl(_, response)) = self.waiting_for(id) {
             response
         } else {
             Err(SessionError::ServerTimeOut)

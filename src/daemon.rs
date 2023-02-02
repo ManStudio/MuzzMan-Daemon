@@ -13,7 +13,7 @@ use crate::{
 };
 use bytes_kman::TBytes;
 use muzzman_lib::{
-    prelude::{TElement, TLocation, TModuleInfo, Url},
+    prelude::{TElement, TLocation, TModuleInfo},
     session::TSession,
 };
 use polling::Poller;
@@ -392,8 +392,7 @@ impl Daemon {
                     // TODO: Error handlering for url
                     let packet = ClientPackets::ModuleAcceptUrl(
                         id,
-                        self.session
-                            .moduie_accept_url(&module_id, Url::parse(&url).unwrap()),
+                        self.session.module_accept_url(&module_id, url),
                     );
                     self.inner.send(packet, &addr)
                 }
@@ -791,6 +790,25 @@ impl Daemon {
                     let packet = ClientPackets::LocationUnSubscribe(
                         id,
                         self.session.location_unsubscribe(&location_id, to),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ModuleAcceptedProtocols { id, module_id } => {
+                    let packet = ClientPackets::ModuleAcceptedProtocols(
+                        id,
+                        self.session.module_accepted_protocols(&module_id),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementGetUrl { id, element_id } => {
+                    let packet =
+                        ClientPackets::ElementGetUrl(id, self.session.element_get_url(&element_id));
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ElementSetUrl { id, element_id, to } => {
+                    let packet = ClientPackets::ElementSetUrl(
+                        id,
+                        self.session.element_set_url(&element_id, to),
                     );
                     self.inner.send(packet, &addr)
                 }
