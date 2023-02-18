@@ -16,9 +16,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bytes-kman"
-version = "0.1.18"
+version = "0.1.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6df6a3154fb27a485590c22f4e9000b20472218c85d3c54014bf8c0607250a0"
+checksum = "8c9ee107158ddf3941fb584ddf21240f4a649870c968f29b7513919be650d4d1"
 dependencies = [
  "bytes-kman-derive",
 ]
@@ -110,7 +110,7 @@ dependencies = [
 
 [[package]]
 name = "muzzman-daemon"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "bytes-kman",
  "dirs",
@@ -120,9 +120,9 @@ dependencies = [
 
 [[package]]
 name = "muzzman-lib"
-version = "0.3.4"
+version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2f5a959456ffd1a8684cb9d5ad7a5072dc17014abbeaae280d77d283e64f6f7"
+checksum = "d798f4b8af63a232f3bd63fb44863244b563b48a5c6273a3c69f527d1a5ee781"
 dependencies = [
  "bytes-kman",
  "get_ref",
@@ -165,9 +165,9 @@ checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.50"
+version = "1.0.51"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ef7d57beacfaf2d8aee5937dab7b7f28de3cb8b1828479bb5de2a7106f2bae2"
+checksum = "5d727cae5b39d21da60fa540906919ad737832fe0b1c165da3a34d6548c849d6"
 dependencies = [
  "unicode-ident",
 ]

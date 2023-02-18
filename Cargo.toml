@@ -1,7 +1,7 @@
 [package]
 name = "muzzman-daemon"
 description = "MuzzMan Daemon Session"
-version = "0.0.5"
+version = "0.0.6"
 edition = "2021"
 authors = ["konkitoman"]
 repository = "https://github.com/ManStudio/MuzzMan-Daemon"
@@ -17,7 +17,7 @@ path = "./examples/get_location_info.rs"
 
 
 [dependencies]
-bytes-kman = "0.1.18"
-muzzman-lib = "0.3.4"
+bytes-kman = "0.1"
+muzzman-lib = "0.3.5"
 dirs = "4.0.0"
 polling = "2.5.2"
