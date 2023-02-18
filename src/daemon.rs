@@ -1,6 +1,5 @@
 use std::{
     net::{SocketAddr, UdpSocket},
-    os::fd::AsRawFd,
     sync::{Arc, Mutex},
     time::{Duration, SystemTime},
 };
@@ -9,6 +8,7 @@ const CLIENT_TIMEOUT: Duration = Duration::new(3, 0);
 
 use crate::{
     packets::{ClientPackets, ServerPackets},
+    row::{IntoRawSock, RawSock},
     DAEMON_PORT,
 };
 use bytes_kman::TBytes;
@@ -26,7 +26,7 @@ pub struct DaemonInner {
 
 pub struct Daemon {
     session: Box<dyn TSession>,
-    socket_fd: i32,
+    socket_fd: RawSock,
     poller: Poller,
     inner: Arc<Mutex<DaemonInner>>,
 }
@@ -39,7 +39,9 @@ impl Daemon {
         let socket = UdpSocket::bind(format!("127.0.0.1:{DAEMON_PORT}")).unwrap();
         socket.set_nonblocking(true).unwrap();
 
-        let socket_fd = socket.as_raw_fd();
+        let socket_clone = socket.try_clone().unwrap();
+        let socket_fd = socket.into_raw();
+        let socket = socket_clone;
 
         let poller = Poller::new()?;
         poller.add(

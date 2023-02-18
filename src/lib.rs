@@ -13,6 +13,7 @@ use packets::{ClientPackets, ServerPackets};
 pub mod common;
 pub mod daemon;
 pub mod packets;
+pub mod row;
 pub mod session;
 
 pub const DAEMON_PORT: u16 = 2118;
