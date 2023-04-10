@@ -877,7 +877,7 @@ impl TDaemonInner for Arc<Mutex<DaemonInner>> {
         self.lock()
             .unwrap()
             .clients
-            .retain(|(time, _)| time.elapsed().unwrap() > CLIENT_TIMEOUT);
+            .retain(|(time, _)| time.elapsed().unwrap() < CLIENT_TIMEOUT);
     }
 
     fn clients(&self) -> Vec<SocketAddr> {
