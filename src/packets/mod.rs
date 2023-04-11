@@ -182,6 +182,11 @@ pub enum ServerPackets {
         location_id: LocationId,
         name: String,
     },
+    LoadElementInfo {
+        id: u128,
+        element_info: ElementInfo,
+    },
+
     MoveElement {
         id: u128,
         element_id: ElementId,
@@ -348,6 +353,10 @@ pub enum ServerPackets {
         name: String,
         location_id: LocationId,
     },
+    LoadLocationInfo {
+        id: u128,
+        location_info: LocationInfo,
+    },
     GetLocationsLen {
         id: u128,
         location_id: LocationId,
@@ -413,6 +422,12 @@ pub enum ServerPackets {
         location_id: LocationId,
         to: ID,
     },
+    GetVersion {
+        id: u128,
+    },
+    GetVersionText {
+        id: u128,
+    },
 
     Tick,
 }
@@ -456,6 +471,7 @@ pub enum ClientPackets {
     ModuleAcceptedExtensions(u128, Result<Vec<String>, SessionError>),
 
     CreateLocation(u128, Result<LocationId, SessionError>),
+    LoadLocationInfo(u128, Result<LocationId, SessionError>),
     GetLocationsLen(u128, Result<usize, SessionError>),
     GetLocations(u128, Result<Vec<LocationId>, SessionError>),
     DestroyLocation(u128, Result<(), SessionError>),
@@ -478,6 +494,7 @@ pub enum ClientPackets {
     LocationUnSubscribe(u128, Result<(), SessionError>),
 
     CreateElement(u128, Result<ElementId, SessionError>),
+    LoadElementInfo(u128, Result<ElementId, SessionError>),
     MoveElement(u128, Result<(), SessionError>),
     DestroyElement(u128, Result<(), SessionError>),
     ElementGetName(u128, Result<String, SessionError>),
@@ -513,6 +530,9 @@ pub enum ClientPackets {
     ElementEmit(u128, Result<(), SessionError>),
     ElementSubscribe(u128, Result<(), SessionError>),
     ElementUnSubscribe(u128, Result<(), SessionError>),
+
+    GetVersion(u128, Result<u64, SessionError>),
+    GetVersionText(u128, Result<String, SessionError>),
 
     NewSessionEvent(SessionEvent),
 }
@@ -608,6 +628,10 @@ impl ClientPackets {
             ClientPackets::ModuleGetVersion(id, _) => *id,
             ClientPackets::ModuleSupportedVersions(id, _) => *id,
             ClientPackets::ModuleAcceptedExtensions(id, _) => *id,
+            ClientPackets::LoadElementInfo(id, _) => *id,
+            ClientPackets::LoadLocationInfo(id, _) => *id,
+            ClientPackets::GetVersion(id, _) => *id,
+            ClientPackets::GetVersionText(id, _) => *id,
         }
     }
 }

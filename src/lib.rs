@@ -10,6 +10,8 @@ use bytes_kman::TBytes;
 use muzzman_lib::prelude::*;
 use packets::{ClientPackets, ServerPackets};
 
+pub const DAEMON_VERSION: u64 = 1;
+
 pub mod common;
 pub mod daemon;
 pub mod packets;

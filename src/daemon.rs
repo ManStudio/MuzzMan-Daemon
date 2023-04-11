@@ -9,7 +9,7 @@ const CLIENT_TIMEOUT: Duration = Duration::new(3, 0);
 use crate::{
     packets::{ClientPackets, ServerPackets},
     row::{IntoRawSock, RawSock},
-    DAEMON_PORT,
+    DAEMON_PORT, DAEMON_VERSION,
 };
 use bytes_kman::TBytes;
 use muzzman_lib::{
@@ -864,6 +864,37 @@ impl Daemon {
                         &addr,
                     );
                 }
+                ServerPackets::LoadElementInfo { id, element_info } => self.inner.send(
+                    ClientPackets::LoadElementInfo(
+                        id,
+                        self.session
+                            .load_element_info(element_info)
+                            .map(|_ref| _ref.id()),
+                    ),
+                    &addr,
+                ),
+                ServerPackets::LoadLocationInfo { id, location_info } => self.inner.send(
+                    ClientPackets::LoadLocationInfo(
+                        id,
+                        self.session
+                            .load_location_info(location_info)
+                            .map(|_ref| _ref.id()),
+                    ),
+                    &addr,
+                ),
+                ServerPackets::GetVersion { id } => self.inner.send(
+                    ClientPackets::GetVersion(id, self.session.get_version()),
+                    &addr,
+                ),
+                ServerPackets::GetVersionText { id } => self.inner.send(
+                    ClientPackets::GetVersionText(
+                        id,
+                        self.session
+                            .get_version_text()
+                            .map(|version| format!("{version}, Daemon: {DAEMON_VERSION}")),
+                    ),
+                    &addr,
+                ),
             }
         }
     }

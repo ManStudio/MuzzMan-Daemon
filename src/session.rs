@@ -6,6 +6,8 @@ use crate::{
 };
 use muzzman_lib::prelude::*;
 
+pub const DAEMON_CLIENT_VERSION: u64 = 1;
+
 impl TSession for Box<dyn TDaemonSession> {
     fn load_module(&self, path: PathBuf) -> Result<MRef, SessionError> {
         let id = self.generate();
@@ -562,8 +564,16 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn load_element_info(&self, info: ElementInfo) -> Result<ERef, SessionError> {
-        todo!()
+    fn load_element_info(&self, element_info: ElementInfo) -> Result<ERef, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LoadElementInfo { id, element_info };
+
+        self.send(packet);
+        if let Some(ClientPackets::LoadElementInfo(_, id)) = self.waiting_for(id) {
+            self.get_element_ref(&id?)
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn move_element(
@@ -1037,8 +1047,9 @@ impl TSession for Box<dyn TDaemonSession> {
         storage: Option<Storage>,
     ) -> Result<(), SessionError> {
         if storage.is_some() {
-            // TODO: Find a method to implement this!
-            todo!()
+            panic!(
+                "element_set_enable cannot be called with Storage! Storage cannot be transfered!"
+            );
         }
 
         let id = self.generate();
@@ -1189,8 +1200,19 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn load_location_info(&self, info: LocationInfo) -> Result<LRef, SessionError> {
-        todo!()
+    fn load_location_info(&self, location_info: LocationInfo) -> Result<LRef, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LoadLocationInfo { id, location_info };
+
+        self.send(packet);
+        if let Some(ClientPackets::LoadLocationInfo(_, response)) = self.waiting_for(id) {
+            match response {
+                Ok(id) => self.get_location_ref(&id),
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn get_locations_len(&self, location_id: &LocationId) -> Result<usize, SessionError> {
@@ -1560,11 +1582,25 @@ impl TSession for Box<dyn TDaemonSession> {
     }
 
     fn get_version(&self) -> Result<u64, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::GetVersion { id };
+        self.send(packet);
+        if let Some(ClientPackets::GetVersion(_, res)) = self.waiting_for(id) {
+            res
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn get_version_text(&self) -> Result<String, SessionError> {
-        todo!()
+        let id = self.generate();
+        let packet = ServerPackets::GetVersion { id };
+        self.send(packet);
+        if let Some(ClientPackets::GetVersion(_, res)) = self.waiting_for(id) {
+            res.map(|version| format!("{version}, DaemonClient: {DAEMON_CLIENT_VERSION}"))
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
     }
 
     fn c(&self) -> Box<dyn TSession> {
