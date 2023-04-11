@@ -115,6 +115,7 @@ impl Daemon {
             };
         for packet in packets {
             match packet {
+                ServerPackets::Tick => {}
                 ServerPackets::GetDefaultLocation { id } => {
                     let packet = match self.session.get_default_location() {
                         Ok(ok) => ClientPackets::GetDefaultLocation(id, Ok(ok.id())),
@@ -814,7 +815,55 @@ impl Daemon {
                     );
                     self.inner.send(packet, &addr)
                 }
-                ServerPackets::Tick => {}
+                ServerPackets::LoadModuleInfo { id, module_info } => {
+                    let packet = ClientPackets::LoadModuleInfo(
+                        id,
+                        self.session
+                            .load_module_info(module_info)
+                            .map(|_ref| _ref.id()),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::FindModule { id, module_info } => {
+                    let packet = ClientPackets::FindModule(
+                        id,
+                        self.session.find_module(module_info).map(|_ref| _ref.id()),
+                    );
+                    self.inner.send(packet, &addr)
+                }
+                ServerPackets::ModuleGetUid { id, module_id } => {
+                    self.inner.send(
+                        ClientPackets::ModuleGetUid(id, self.session.module_get_uid(&module_id)),
+                        &addr,
+                    );
+                }
+                ServerPackets::ModuleGetVersion { id, module_id } => {
+                    self.inner.send(
+                        ClientPackets::ModuleGetVersion(
+                            id,
+                            self.session.module_get_version(&module_id),
+                        ),
+                        &addr,
+                    );
+                }
+                ServerPackets::ModuleSupportedVersions { id, module_id } => {
+                    self.inner.send(
+                        ClientPackets::ModuleSupportedVersions(
+                            id,
+                            self.session.module_supported_versions(&module_id),
+                        ),
+                        &addr,
+                    );
+                }
+                ServerPackets::ModuleAcceptedExtensions { id, module_id } => {
+                    self.inner.send(
+                        ClientPackets::ModuleAcceptedExtensions(
+                            id,
+                            self.session.module_accepted_extensions(&module_id),
+                        ),
+                        &addr,
+                    );
+                }
             }
         }
     }

@@ -121,10 +121,9 @@ dependencies = [
 [[package]]
 name = "muzzman-lib"
 version = "0.3.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d798f4b8af63a232f3bd63fb44863244b563b48a5c6273a3c69f527d1a5ee781"
 dependencies = [
  "bytes-kman",
+ "dirs",
  "get_ref",
  "libloading",
  "muzzman-lib-macros",

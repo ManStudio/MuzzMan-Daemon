@@ -37,6 +37,42 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
+    fn load_module_info(&self, info: ModuleInfo) -> Result<MRef, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LoadModuleInfo {
+            id,
+            module_info: info,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::LoadModuleInfo(_, response)) = self.waiting_for(id) {
+            match response {
+                Ok(id) => self.get_module_ref(&id),
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn find_module(&self, info: ModuleInfo) -> Result<MRef, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::FindModule {
+            id,
+            module_info: info,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::FindModule(_, response)) = self.waiting_for(id) {
+            match response {
+                Ok(id) => self.get_module_ref(&id),
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
     fn register_action(
         &self,
         _module_id: &ModuleId,
@@ -44,11 +80,11 @@ impl TSession for Box<dyn TDaemonSession> {
         _values: Vec<(String, Value)>,
         _callback: fn(MRef, values: Vec<Type>),
     ) -> Result<(), SessionError> {
-        todo!()
+        panic!("Cannot register action over the network because function calls are unexpected behaviour\nIf you want to register action you should a module that do what you need to do!");
     }
 
     fn remove_action(&self, _module_id: &ModuleId, _name: String) -> Result<(), SessionError> {
-        todo!()
+        panic!("remove_action is not implemented because you cannot register action!")
     }
 
     fn get_actions(&self, range: std::ops::Range<usize>) -> Result<Actions, SessionError> {
@@ -180,6 +216,54 @@ impl TSession for Box<dyn TDaemonSession> {
         self.send(packet);
         if let Some(ClientPackets::ModuleGetDefaultName(_, response)) = self.waiting_for(id) {
             response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn module_get_uid(&self, module_id: &ModuleId) -> Result<UID, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::ModuleGetUid {
+            id,
+            module_id: *module_id,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleGetUid(_, res)) = self.waiting_for(id) {
+            res
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn module_get_version(&self, module_id: &ModuleId) -> Result<String, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::ModuleGetVersion {
+            id,
+            module_id: *module_id,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleGetVersion(_, res)) = self.waiting_for(id) {
+            res
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn module_supported_versions(
+        &self,
+        module_id: &ModuleId,
+    ) -> Result<std::ops::Range<u64>, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::ModuleSupportedVersions {
+            id,
+            module_id: *module_id,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleSupportedVersions(_, res)) = self.waiting_for(id) {
+            res
         } else {
             Err(SessionError::ServerTimeOut)
         }
@@ -410,11 +494,29 @@ impl TSession for Box<dyn TDaemonSession> {
         let id = self.generate();
         let packet = ServerPackets::ModuleAcceptedProtocols {
             id,
-            module_id: module_id.clone(),
+            module_id: *module_id,
         };
 
         self.send(packet);
         if let Some(ClientPackets::ModuleAcceptedProtocols(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn module_accepted_extensions(
+        &self,
+        module_id: &ModuleId,
+    ) -> Result<Vec<String>, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::ModuleAcceptedExtensions {
+            id,
+            module_id: *module_id,
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ModuleAcceptedExtensions(_, response)) = self.waiting_for(id) {
             response
         } else {
             Err(SessionError::ServerTimeOut)
@@ -428,7 +530,7 @@ impl TSession for Box<dyn TDaemonSession> {
         _control_flow: ControlFlow,
         _storage: Storage,
     ) -> Result<(ControlFlow, Storage), SessionError> {
-        todo!()
+        panic!("module_step_element cannot be implemented because Storage cannot be transfered! Storage contains row pointers that is only avalibile for the current program!");
     }
 
     fn module_step_location(
@@ -438,7 +540,7 @@ impl TSession for Box<dyn TDaemonSession> {
         _control_flow: ControlFlow,
         _storage: Storage,
     ) -> Result<(ControlFlow, Storage), SessionError> {
-        todo!()
+        panic!("module_step_location cannot be implemented because Storage cannot be transgered! Storage contains row pointers that is only avalibile for the current program!");
     }
 
     fn create_element(&self, name: &str, location_id: &LocationId) -> Result<ERef, SessionError> {
@@ -458,6 +560,10 @@ impl TSession for Box<dyn TDaemonSession> {
         } else {
             Err(SessionError::ServerTimeOut)
         }
+    }
+
+    fn load_element_info(&self, info: ElementInfo) -> Result<ERef, SessionError> {
+        todo!()
     }
 
     fn move_element(
@@ -1083,6 +1189,10 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
+    fn load_location_info(&self, info: LocationInfo) -> Result<LRef, SessionError> {
+        todo!()
+    }
+
     fn get_locations_len(&self, location_id: &LocationId) -> Result<usize, SessionError> {
         let id = self.generate();
         let packet = ServerPackets::GetLocationsLen {
@@ -1447,6 +1557,14 @@ impl TSession for Box<dyn TDaemonSession> {
 
     fn get_location_ref(&self, id: &LocationId) -> Result<LRef, SessionError> {
         Ok(self.lref_get_or_add(id.clone()))
+    }
+
+    fn get_version(&self) -> Result<u64, SessionError> {
+        todo!()
+    }
+
+    fn get_version_text(&self) -> Result<String, SessionError> {
+        todo!()
     }
 
     fn c(&self) -> Box<dyn TSession> {

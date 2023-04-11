@@ -4,10 +4,10 @@ use bytes_kman::prelude::*;
 use muzzman_lib::{
     prelude::{
         Data, ElementId, ElementInfo, Event, FileOrData, LocationId, LocationInfo, ModuleId,
-        SessionEvent, Value,
+        ModuleInfo, SessionEvent, Value,
     },
     session::SessionError,
-    types::{Type, ID},
+    types::{MRef, Type, ID, UID},
 };
 
 // send
@@ -20,6 +20,14 @@ pub enum ServerPackets {
     RemoveModule {
         id: u128,
         module_id: ModuleId,
+    },
+    LoadModuleInfo {
+        id: u128,
+        module_info: ModuleInfo,
+    },
+    FindModule {
+        id: u128,
+        module_info: ModuleInfo,
     },
 
     GetActionsLen {
@@ -56,6 +64,22 @@ pub enum ServerPackets {
         id: u128,
         module_id: ModuleId,
     },
+
+    ModuleGetUid {
+        id: u128,
+        module_id: ModuleId,
+    },
+
+    ModuleGetVersion {
+        id: u128,
+        module_id: ModuleId,
+    },
+
+    ModuleSupportedVersions {
+        id: u128,
+        module_id: ModuleId,
+    },
+
     ModuleGetDesc {
         id: u128,
         module_id: ModuleId,
@@ -119,6 +143,10 @@ pub enum ServerPackets {
         filename: String,
     },
     ModuleAcceptedProtocols {
+        id: u128,
+        module_id: ModuleId,
+    },
+    ModuleAcceptedExtensions {
         id: u128,
         module_id: ModuleId,
     },
@@ -396,6 +424,8 @@ pub type Actions = Vec<(String, ModuleId, Vec<(String, Value)>)>;
 pub enum ClientPackets {
     LoadModule(u128, Result<ModuleId, SessionError>),
     RemoveModule(u128, Result<(), SessionError>),
+    LoadModuleInfo(u128, Result<ModuleId, SessionError>),
+    FindModule(u128, Result<ModuleId, SessionError>),
 
     GetActionsLen(u128, Result<usize, SessionError>),
     GetActions(u128, Result<Actions, SessionError>),
@@ -406,6 +436,9 @@ pub enum ClientPackets {
     ModuleGetName(u128, Result<String, SessionError>),
     ModuleSetName(u128, Result<(), SessionError>),
     ModuleGetDefaultName(u128, Result<String, SessionError>),
+    ModuleGetUid(u128, Result<UID, SessionError>),
+    ModuleGetVersion(u128, Result<String, SessionError>),
+    ModuleSupportedVersions(u128, Result<std::ops::Range<u64>, SessionError>),
     ModuleGetDesc(u128, Result<String, SessionError>),
     ModuleSetDesc(u128, Result<(), SessionError>),
     ModuleGetDefaultDesc(u128, Result<String, SessionError>),
@@ -420,6 +453,7 @@ pub enum ClientPackets {
     ModuleAcceptUrl(u128, Result<bool, SessionError>),
     ModuleAcceptExtension(u128, Result<bool, SessionError>),
     ModuleAcceptedProtocols(u128, Result<Vec<String>, SessionError>),
+    ModuleAcceptedExtensions(u128, Result<Vec<String>, SessionError>),
 
     CreateLocation(u128, Result<LocationId, SessionError>),
     GetLocationsLen(u128, Result<usize, SessionError>),
@@ -486,6 +520,7 @@ pub enum ClientPackets {
 impl ClientPackets {
     pub fn id(&self) -> u128 {
         match self {
+            ClientPackets::NewSessionEvent(_) => 0,
             ClientPackets::GetDefaultLocation(id, _) => *id,
             ClientPackets::LocationGetName(id, _) => *id,
             ClientPackets::LocationSetName(id, _) => *id,
@@ -567,7 +602,12 @@ impl ClientPackets {
             ClientPackets::ModuleAcceptedProtocols(id, _) => *id,
             ClientPackets::ElementGetUrl(id, _) => *id,
             ClientPackets::ElementSetUrl(id, _) => *id,
-            ClientPackets::NewSessionEvent(_) => 0,
+            ClientPackets::LoadModuleInfo(id, _) => *id,
+            ClientPackets::FindModule(id, _) => *id,
+            ClientPackets::ModuleGetUid(id, _) => *id,
+            ClientPackets::ModuleGetVersion(id, _) => *id,
+            ClientPackets::ModuleSupportedVersions(id, _) => *id,
+            ClientPackets::ModuleAcceptedExtensions(id, _) => *id,
         }
     }
 }
