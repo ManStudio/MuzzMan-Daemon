@@ -1594,9 +1594,9 @@ impl TSession for Box<dyn TDaemonSession> {
 
     fn get_version_text(&self) -> Result<String, SessionError> {
         let id = self.generate();
-        let packet = ServerPackets::GetVersion { id };
+        let packet = ServerPackets::GetVersionText { id };
         self.send(packet);
-        if let Some(ClientPackets::GetVersion(_, res)) = self.waiting_for(id) {
+        if let Some(ClientPackets::GetVersionText(_, res)) = self.waiting_for(id) {
             res.map(|version| format!("{version}, DaemonClient: {DAEMON_CLIENT_VERSION}"))
         } else {
             Err(SessionError::ServerTimeOut)
