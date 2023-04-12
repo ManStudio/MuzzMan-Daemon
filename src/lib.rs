@@ -20,6 +20,8 @@ pub mod session;
 
 pub const DAEMON_PORT: u16 = 2118;
 
+pub const TIMEOUT: Duration = Duration::new(1, 0);
+
 pub mod prelude {
     pub use crate::common::get_modules;
     pub use crate::DaemonSession;
@@ -173,7 +175,7 @@ impl TDaemonSession for Arc<RwLock<DaemonSession>> {
         let start_time = SystemTime::now();
         let mut index = None;
         'm: loop {
-            if start_time.elapsed().unwrap() > Duration::from_secs(1) {
+            if start_time.elapsed().unwrap() > TIMEOUT {
                 println!("Time Out!");
                 break;
             }

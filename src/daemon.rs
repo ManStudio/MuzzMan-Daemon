@@ -392,7 +392,6 @@ impl Daemon {
                     self.inner.send(packet, &addr)
                 }
                 ServerPackets::ModuleAcceptUrl { id, module_id, url } => {
-                    // TODO: Error handlering for url
                     let packet = ClientPackets::ModuleAcceptUrl(
                         id,
                         self.session.module_accept_url(&module_id, url),
@@ -916,6 +915,7 @@ impl DaemonInner {
 
 impl TDaemonInner for Arc<Mutex<DaemonInner>> {
     fn send(&self, packet: ClientPackets, to: &SocketAddr) {
+        log::trace!("Send: {}, Packet: {:?}", to, packet);
         let mut bytes = packet.to_bytes();
         bytes.reverse();
         let _ = self.lock().unwrap().socket.send_to(&bytes, to);
@@ -947,6 +947,7 @@ impl TDaemonInner for Arc<Mutex<DaemonInner>> {
         let mut packets = Vec::new();
         while !buffer.is_empty() {
             let Some(packet) = ServerPackets::from_bytes(&mut buffer) else{continue};
+            log::trace!("From: {}, Packet: {:?}", from, packet);
             packets.push(packet)
         }
 
@@ -962,6 +963,8 @@ impl TDaemonInner for Arc<Mutex<DaemonInner>> {
 
     fn clients(&self) -> Vec<SocketAddr> {
         self.gc_clients();
+
+        log::trace!("Clients: {:?}", self.lock().unwrap().clients);
         self.lock()
             .unwrap()
             .clients

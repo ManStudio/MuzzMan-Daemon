@@ -3,6 +3,8 @@ use muzzman_daemon::{
 };
 
 fn main() {
+    env_logger::init();
+
     let daemon = Daemon::new().unwrap();
     let daemon = std::thread::spawn(|| daemon.run());
     {
