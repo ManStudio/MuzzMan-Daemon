@@ -64,6 +64,7 @@ impl Daemon {
 
         let inner_clone = inner.clone();
         session.callback = Some(Box::new(move |event| {
+            log::info!("{event:?}");
             let clients = inner_clone.clients();
             for client in clients {
                 inner_clone.send(ClientPackets::NewSessionEvent(event.clone()), &client);
