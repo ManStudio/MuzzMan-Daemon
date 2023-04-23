@@ -64,10 +64,8 @@ impl DaemonSession {
         let mut master_buffer = Vec::new();
 
         while let Ok(len) = self.conn.recv(&mut buffer) {
-            master_buffer.append(&mut buffer[0..len].to_vec())
+            master_buffer.append(&mut buffer[0..len].to_vec());
         }
-
-        println!("{}", master_buffer.len());
 
         while !master_buffer.is_empty() {
             if let Some(packet) = ClientPackets::from_bytes(&mut master_buffer) {
