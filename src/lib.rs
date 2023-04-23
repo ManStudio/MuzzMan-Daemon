@@ -20,7 +20,7 @@ pub mod session;
 
 pub const DAEMON_PORT: u16 = 2118;
 
-pub const TIMEOUT: Duration = Duration::new(1, 0);
+pub const TIMEOUT: Duration = Duration::new(3, 0);
 
 pub mod prelude {
     pub use crate::common::get_modules;
@@ -46,7 +46,7 @@ impl DaemonSession {
         let conn = UdpSocket::bind("127.0.0.1:0")?;
         conn.connect(format!("127.0.0.1:{DAEMON_PORT}"))?;
         let _ = conn.set_nonblocking(true);
-        let _ = conn.set_read_timeout(Some(Duration::new(10, 0)));
+        let _ = conn.set_read_timeout(Some(TIMEOUT));
         Ok(Self {
             conn,
             packets: Vec::new(),
@@ -61,50 +61,54 @@ impl DaemonSession {
     pub fn pull_packets(&mut self) {
         let mut buffer = [0; 4096];
 
-        if let Ok(len) = self.conn.recv(&mut buffer) {
-            let mut buffer = buffer[0..len].to_vec();
+        let mut master_buffer = Vec::new();
 
-            while !buffer.is_empty() {
-                if let Some(packet) = ClientPackets::from_bytes(&mut buffer) {
-                    if let ClientPackets::NewSessionEvent(event) = packet {
-                        match event {
-                            SessionEvent::DestroyedElement(id) => {
-                                self.element_refs.retain(|eref| eref.id() != id);
-                            }
-                            SessionEvent::DestroyedLocation(id) => {
-                                self.locations_refs.retain(|lref| lref.id() != id)
-                            }
-                            SessionEvent::DestroyedModule(id) => {
-                                self.module_refs.retain(|mref| mref.id() != id)
-                            }
-                            SessionEvent::ElementIdChanged(last, new) => {
-                                for eref in self.element_refs.iter_mut() {
-                                    if eref.id() == last {
-                                        eref.write().unwrap().id = new.clone();
-                                        break;
-                                    }
-                                }
-                            }
-                            SessionEvent::LocationIdChanged(last, new) => {
-                                for lref in self.locations_refs.iter_mut() {
-                                    if lref.id() == last {
-                                        lref.write().unwrap().id = new;
-                                        break;
-                                    }
-                                }
-                            }
-                            SessionEvent::ModuleIdChanged(last, new) => {
-                                for mref in self.module_refs.iter_mut() {
-                                    if mref.id() == last {
-                                        mref.write().unwrap().uid = new;
-                                    }
-                                }
-                            }
-                            _ => {}
+        while let Ok(len) = self.conn.recv(&mut buffer) {
+            master_buffer.append(&mut buffer[0..len].to_vec())
+        }
+
+        println!("{}", master_buffer.len());
+
+        while !master_buffer.is_empty() {
+            if let Some(packet) = ClientPackets::from_bytes(&mut master_buffer) {
+                if let ClientPackets::NewSessionEvent(event) = packet {
+                    match event {
+                        SessionEvent::DestroyedElement(id) => {
+                            self.element_refs.retain(|eref| eref.id() != id);
                         }
-                    } else {
-                        self.packets.push(packet)
+                        SessionEvent::DestroyedLocation(id) => {
+                            self.locations_refs.retain(|lref| lref.id() != id)
+                        }
+                        SessionEvent::DestroyedModule(id) => {
+                            self.module_refs.retain(|mref| mref.id() != id)
+                        }
+                        SessionEvent::ElementIdChanged(last, new) => {
+                            for eref in self.element_refs.iter_mut() {
+                                if eref.id() == last {
+                                    eref.write().unwrap().id = new.clone();
+                                    break;
+                                }
+                            }
+                        }
+                        SessionEvent::LocationIdChanged(last, new) => {
+                            for lref in self.locations_refs.iter_mut() {
+                                if lref.id() == last {
+                                    lref.write().unwrap().id = new;
+                                    break;
+                                }
+                            }
+                        }
+                        SessionEvent::ModuleIdChanged(last, new) => {
+                            for mref in self.module_refs.iter_mut() {
+                                if mref.id() == last {
+                                    mref.write().unwrap().uid = new;
+                                }
+                            }
+                        }
+                        _ => {}
                     }
+                } else {
+                    self.packets.push(packet)
                 }
             }
         }
@@ -194,7 +198,10 @@ impl TDaemonSession for Arc<RwLock<DaemonSession>> {
     fn send(&self, packet: ServerPackets) {
         let mut bytes = packet.to_bytes();
         bytes.reverse();
-        let _ = self.write().unwrap().conn.send(&bytes);
+
+        for chunk in bytes.chunks(4096) {
+            let _ = self.write().unwrap().conn.send(chunk);
+        }
     }
 
     fn generate(&self) -> u128 {

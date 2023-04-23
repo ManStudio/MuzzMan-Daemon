@@ -23,6 +23,9 @@ path = "./examples/get_version.rs"
 name = "save_and_loading"
 path = "./examples/save_and_loading.rs"
 
+[profile.dev.build-override]
+debug = true
+
 [dependencies]
 bytes-kman = "0.1"
 # muzzman-lib = "0.3.5"
