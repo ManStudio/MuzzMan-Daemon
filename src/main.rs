@@ -5,8 +5,10 @@ use muzzman_daemon::{
 fn main() {
     env_logger::init();
 
-    let daemon = Daemon::new().unwrap();
-    let daemon = std::thread::spawn(|| daemon.run());
+    let runtime = tokio::runtime::Runtime::new().unwrap();
+
+    let daemon = runtime.block_on(Daemon::new()).unwrap();
+    let daemon = runtime.spawn(async move { daemon.run().await });
     {
         let session = DaemonSession::new()
             .expect("Some thing went rong!")
@@ -36,5 +38,5 @@ fn main() {
         }
     }
 
-    daemon.join().unwrap();
+    runtime.block_on(daemon).unwrap();
 }

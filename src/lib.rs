@@ -154,7 +154,7 @@ impl DaemonSession {
     }
 }
 
-pub trait TDaemonSession {
+pub trait TDaemonSession: Send + Sync {
     fn pull_packets(&self);
 
     fn waiting_for(&self, id: u128) -> Option<ClientPackets>;
