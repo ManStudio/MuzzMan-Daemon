@@ -348,7 +348,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn module_get_settings(&self, module_id: &ModuleId) -> Result<Data, SessionError> {
+    fn module_get_settings(&self, module_id: &ModuleId) -> Result<Values, SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleGetSettings {
             id,
@@ -363,7 +363,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn module_set_settings(&self, module_id: &ModuleId, data: Data) -> Result<(), SessionError> {
+    fn module_set_settings(&self, module_id: &ModuleId, data: Values) -> Result<(), SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleSetSettings {
             id,
@@ -379,7 +379,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn module_get_element_settings(&self, module_id: &ModuleId) -> Result<Data, SessionError> {
+    fn module_get_element_settings(&self, module_id: &ModuleId) -> Result<Values, SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleGetElementSettings {
             id,
@@ -397,7 +397,7 @@ impl TSession for Box<dyn TDaemonSession> {
     fn module_set_element_settings(
         &self,
         module_id: &ModuleId,
-        data: Data,
+        data: Values,
     ) -> Result<(), SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleSetElementSettings {
@@ -418,14 +418,12 @@ impl TSession for Box<dyn TDaemonSession> {
         &self,
         module_id: &ModuleId,
         location_id: &LocationId,
-        data: FileOrData,
     ) -> Result<(), SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ModuleInitLocation {
             id,
             module_id: *module_id,
             location_id: location_id.clone(),
-            data,
         };
 
         self.send(packet);
@@ -739,7 +737,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn element_get_element_data(&self, element_id: &ElementId) -> Result<Data, SessionError> {
+    fn element_get_element_data(&self, element_id: &ElementId) -> Result<Values, SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ElementGetElementData {
             id,
@@ -757,7 +755,7 @@ impl TSession for Box<dyn TDaemonSession> {
     fn element_set_element_data(
         &self,
         element_id: &ElementId,
-        data: Data,
+        data: Values,
     ) -> Result<(), SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ElementSetElementData {
@@ -774,7 +772,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn element_get_module_data(&self, element_id: &ElementId) -> Result<Data, SessionError> {
+    fn element_get_module_data(&self, element_id: &ElementId) -> Result<Values, SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ElementGetModuleData {
             id,
@@ -792,7 +790,7 @@ impl TSession for Box<dyn TDaemonSession> {
     fn element_set_module_data(
         &self,
         element_id: &ElementId,
-        data: Data,
+        data: Values,
     ) -> Result<(), SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ElementSetModuleData {
@@ -920,7 +918,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn element_get_data(&self, element_id: &ElementId) -> Result<FileOrData, SessionError> {
+    fn element_get_data(&self, element_id: &ElementId) -> Result<Data, SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ElementGetData {
             id,
@@ -935,11 +933,7 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
-    fn element_set_data(
-        &self,
-        element_id: &ElementId,
-        data: FileOrData,
-    ) -> Result<(), SessionError> {
+    fn element_set_data(&self, element_id: &ElementId, data: Data) -> Result<(), SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ElementSetData {
             id,

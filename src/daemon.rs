@@ -381,12 +381,10 @@ impl Daemon {
                         id,
                         module_id,
                         location_id,
-                        data,
                     } => {
                         let packet = ClientPackets::ModuleInitLocation(
                             id,
-                            self.session
-                                .module_init_location(&module_id, &location_id, data),
+                            self.session.module_init_location(&module_id, &location_id),
                         );
                         self.inner.send(packet, &addr)
                     }

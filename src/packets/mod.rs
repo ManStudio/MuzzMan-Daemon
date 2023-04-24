@@ -3,11 +3,11 @@ use std::{ops::Range, path::PathBuf};
 use bytes_kman::prelude::*;
 use muzzman_lib::{
     prelude::{
-        Data, ElementId, ElementInfo, Event, FileOrData, LocationId, LocationInfo, ModuleId,
-        ModuleInfo, SessionEvent, Value,
+        Data, ElementId, ElementInfo, Event, LocationId, LocationInfo, ModuleId, ModuleInfo,
+        SessionEvent, Value, Values,
     },
     session::SessionError,
-    types::{MRef, Type, ID, UID},
+    types::{Type, ID, UID},
 };
 
 // send
@@ -109,7 +109,7 @@ pub enum ServerPackets {
     ModuleSetSettings {
         id: u128,
         module_id: ModuleId,
-        to: Data,
+        to: Values,
     },
 
     ModuleGetElementSettings {
@@ -119,13 +119,12 @@ pub enum ServerPackets {
     ModuleSetElementSettings {
         id: u128,
         module_id: ModuleId,
-        to: Data,
+        to: Values,
     },
     ModuleInitLocation {
         id: u128,
         module_id: ModuleId,
         location_id: LocationId,
-        data: FileOrData,
     },
     ModuleInitElement {
         id: u128,
@@ -241,7 +240,7 @@ pub enum ServerPackets {
     ElementSetElementData {
         id: u128,
         element_id: ElementId,
-        to: Data,
+        to: Values,
     },
     ElementGetModuleData {
         id: u128,
@@ -250,7 +249,7 @@ pub enum ServerPackets {
     ElementSetModuleData {
         id: u128,
         element_id: ElementId,
-        to: Data,
+        to: Values,
     },
     ElementGetModule {
         id: u128,
@@ -286,7 +285,7 @@ pub enum ServerPackets {
     ElementSetData {
         id: u128,
         element_id: ElementId,
-        to: FileOrData,
+        to: Data,
     },
     ElementGetProgress {
         id: u128,
@@ -459,9 +458,9 @@ pub enum ClientPackets {
     ModuleGetDefaultDesc(u128, Result<String, SessionError>),
     ModuleGetProxy(u128, Result<usize, SessionError>),
     ModuleSetProxy(u128, Result<(), SessionError>),
-    ModuleGetSettings(u128, Box<Result<Data, SessionError>>),
+    ModuleGetSettings(u128, Box<Result<Values, SessionError>>),
     ModuleSetSettings(u128, Result<(), SessionError>),
-    ModuleGetElementSettings(u128, Result<Data, SessionError>),
+    ModuleGetElementSettings(u128, Result<Values, SessionError>),
     ModuleSetElementSettings(u128, Result<(), SessionError>),
     ModuleInitLocation(u128, Result<(), SessionError>),
     ModuleInitElement(u128, Result<(), SessionError>),
@@ -505,9 +504,9 @@ pub enum ClientPackets {
     ElementSetMeta(u128, Result<(), SessionError>),
     ElementGetUrl(u128, Result<Option<String>, SessionError>),
     ElementSetUrl(u128, Result<(), SessionError>),
-    ElementGetElementData(u128, Result<Data, SessionError>),
+    ElementGetElementData(u128, Result<Values, SessionError>),
     ElementSetElementData(u128, Result<(), SessionError>),
-    ElementGetModuleData(u128, Result<Data, SessionError>),
+    ElementGetModuleData(u128, Result<Values, SessionError>),
     ElementSetModuleData(u128, Result<(), SessionError>),
     ElementGetModule(u128, Result<Option<ModuleId>, SessionError>),
     ElementSetModule(u128, Result<(), SessionError>),
@@ -515,7 +514,7 @@ pub enum ClientPackets {
     ElementSetStatuses(u128, Result<(), SessionError>),
     ElementGetStatus(u128, Result<usize, SessionError>),
     ElementSetStatus(u128, Result<(), SessionError>),
-    ElementGetData(u128, Result<FileOrData, SessionError>),
+    ElementGetData(u128, Result<Data, SessionError>),
     ElementSetData(u128, Result<(), SessionError>),
     ElementGetProgress(u128, Result<f32, SessionError>),
     ElementSetProgress(u128, Result<(), SessionError>),
