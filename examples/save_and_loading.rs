@@ -29,7 +29,7 @@ fn main() {
     println!("Json: {location_info_json}");
 
     let mut location_info: LocationInfo = from_jstr(&location_info_json).expect("Cannot parse");
-    location_info.name = format!("The New Name");
+    location_info.name = "The New Name".to_string();
     let location = session.load_location_info(location_info).unwrap();
 
     let location_info = location.get_location_info().unwrap();

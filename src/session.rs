@@ -459,7 +459,7 @@ impl TSession for Box<dyn TDaemonSession> {
         let packet = ServerPackets::ModuleAcceptUrl {
             id,
             module_id: *module_id,
-            url: url.to_string(),
+            url,
         };
 
         self.send(packet);
