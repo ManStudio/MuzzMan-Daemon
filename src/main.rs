@@ -6,11 +6,14 @@ fn main() {
     env_logger::init();
 
     let runtime = tokio::runtime::Runtime::new().unwrap();
+    runtime.handle().enter();
 
     let daemon = runtime.block_on(Daemon::new()).unwrap();
     let daemon = runtime.spawn(async move { daemon.run().await });
-    {
+
+    runtime.block_on(async {
         let session = DaemonSession::new()
+            .await
             .expect("Some thing went rong!")
             .create_session();
         if let Ok(dir) = get_muzzman_dir().join("modules").read_dir() {
@@ -36,7 +39,7 @@ fn main() {
                 }
             }
         }
-    }
+    });
 
     runtime.block_on(daemon).unwrap();
 }

@@ -1,13 +1,19 @@
 use muzzman_daemon::prelude::*;
 
 fn main() {
-    let session = DaemonSession::new()
-        .expect("Cannot connect to daemon")
-        .create_session();
+    let runtime = tokio::runtime::Runtime::new().unwrap();
+    runtime.handle().enter();
 
-    let version = session.get_version().expect("version");
-    let version_text = session.get_version_text().expect("version_text");
+    runtime.block_on(async {
+        let session = DaemonSession::new()
+            .await
+            .expect("Cannot connect to daemon")
+            .create_session();
 
-    println!("Version: {version}");
-    println!("Version Text: {version_text}");
+        let version = session.get_version().expect("version");
+        let version_text = session.get_version_text().expect("version_text");
+
+        println!("Version: {version}");
+        println!("Version Text: {version_text}");
+    })
 }

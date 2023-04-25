@@ -1,6 +1,5 @@
 use std::{
     collections::HashMap,
-    net::SocketAddr,
     sync::Arc,
     time::{Duration, SystemTime},
 };
@@ -10,18 +9,19 @@ const CLIENT_TIMEOUT: Duration = Duration::new(3, 0);
 use async_trait::async_trait;
 
 use crate::{
+    common::{Socket, SocketAddr},
     packets::{ClientPackets, ServerPackets},
     DAEMON_PORT, DAEMON_VERSION,
 };
 use bytes_kman::TBytes;
 use muzzman_lib::{
-    prelude::{TElement, TLocation, TModuleInfo},
+    prelude::{get_muzzman_dir, TElement, TLocation, TModuleInfo},
     session::TSession,
 };
-use tokio::{net::UdpSocket, sync::Mutex};
+use tokio::sync::Mutex;
 
 pub struct DaemonInner {
-    socket: Arc<UdpSocket>,
+    socket: Arc<Socket>,
     clients: Vec<(SystemTime, SocketAddr)>,
     buffer: [u8; 4096],
 }
@@ -32,7 +32,7 @@ unsafe impl Sync for DaemonInner {}
 pub struct Daemon {
     session: Box<dyn TSession>,
     inner: Arc<Mutex<DaemonInner>>,
-    socket: Arc<UdpSocket>,
+    socket: Arc<Socket>,
 }
 
 unsafe impl Sync for Daemon {}
@@ -40,7 +40,14 @@ unsafe impl Send for Daemon {}
 
 impl Daemon {
     pub async fn new() -> Result<Self, std::io::Error> {
-        let socket = UdpSocket::bind(format!("127.0.0.1:{DAEMON_PORT}")).await?;
+        #[cfg(target_os = "windows")]
+        let socket = Socket::bind(format!("127.0.0.1:{DAEMON_PORT}")).await?;
+        #[cfg(target_os = "linux")]
+        let socket = {
+            let path = get_muzzman_dir().join("daemon.sock");
+            Socket::bind(path)?
+        };
+
         let socket = Arc::new(socket);
         let socket_clone = socket.clone();
 
@@ -921,7 +928,7 @@ trait TDaemonInner {
 }
 
 impl DaemonInner {
-    fn get_inner(&mut self) -> (&mut [u8], &UdpSocket) {
+    fn get_inner(&mut self) -> (&mut [u8], &Socket) {
         (&mut self.buffer, &self.socket)
     }
 }
@@ -929,7 +936,7 @@ impl DaemonInner {
 #[async_trait]
 impl TDaemonInner for Arc<Mutex<DaemonInner>> {
     async fn send(&self, packet: ClientPackets, to: &SocketAddr) {
-        log::trace!("Send: {}, Packet: {:?}", to, packet);
+        log::trace!("Send: {:?}, Packet: {:?}", to, packet);
         let mut bytes = packet.to_bytes();
         bytes.reverse();
 
@@ -948,6 +955,13 @@ impl TDaemonInner for Arc<Mutex<DaemonInner>> {
         let (buffer, socket) = inner.get_inner();
 
         while let Ok((len, from)) = socket.try_recv_from(buffer) {
+            #[cfg(target_os = "linux")]
+            let from = if let Some(from) = from.as_pathname() {
+                from.to_path_buf()
+            } else {
+                log::trace!("Cannot responde to: {:?}", from);
+                continue;
+            };
             let buf = master_buffer.get_mut(&from);
             match buf {
                 Some(buf) => buf.append(&mut buffer[0..len].to_vec()),
@@ -972,11 +986,11 @@ impl TDaemonInner for Arc<Mutex<DaemonInner>> {
                 }
 
                 if !finded {
-                    inner.clients.push((SystemTime::now(), from))
+                    inner.clients.push((SystemTime::now(), from.clone()))
                 }
                 while !buffer.is_empty() {
                     let Some(packet) = ServerPackets::from_bytes(&mut buffer) else{continue};
-                    log::trace!("From: {}, Packet: {:?}", from, packet);
+                    log::trace!("From: {:?}, Packet: {:?}", from, packet);
                     packets.push(packet)
                 }
                 (from, packets)
@@ -999,7 +1013,7 @@ impl TDaemonInner for Arc<Mutex<DaemonInner>> {
             .await
             .clients
             .iter()
-            .map(|(_, addr)| *addr)
+            .map(|(_, addr)| addr.clone())
             .collect::<Vec<SocketAddr>>()
     }
 }
