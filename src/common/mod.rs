@@ -30,13 +30,3 @@ pub fn get_modules() -> Vec<PathBuf> {
     }
     modules
 }
-
-#[cfg(target_os = "windows")]
-pub type Socket = tokio::net::UdpSocket;
-#[cfg(target_os = "windows")]
-pub type SocketAddr = std::net::SocketAddr;
-
-#[cfg(target_os = "linux")]
-pub type Socket = tokio::net::UnixDatagram;
-#[cfg(target_os = "linux")]
-pub type SocketAddr = std::path::PathBuf;

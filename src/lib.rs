@@ -7,10 +7,8 @@ use std::{
 };
 
 use bytes_kman::TBytes;
-use common::Socket;
 use muzzman_lib::prelude::*;
 use packets::{ClientPackets, ServerPackets};
-use prelude::get_modules;
 
 pub const DAEMON_VERSION: u64 = 1;
 
@@ -31,7 +29,7 @@ pub mod prelude {
 }
 
 pub struct DaemonSession {
-    pub conn: Socket,
+    pub conn: UdpSocket,
     pub packets: Vec<ClientPackets>,
     pub generator: u128,
     pub locations_refs: Vec<LRef>,
@@ -44,21 +42,11 @@ unsafe impl Send for DaemonSession {}
 unsafe impl Sync for DaemonSession {}
 
 impl DaemonSession {
-    pub async fn new() -> Result<Self, std::io::Error> {
-        #[cfg(target_os = "windows")]
-        let conn = {
-            let conn = Socket::bind("127.0.0.1:0")?;
-            conn.connect(format!("127.0.0.1:{DAEMON_PORT}"))?;
-            conn
-        };
-        #[cfg(target_os = "linux")]
-        let conn = {
-            let conn = Socket::bind("/tmp/muzzman_daemon_client_1.sock")?;
-            let muzzman_daemon = get_muzzman_dir().join("daemon.sock");
-            conn.connect(muzzman_daemon)?;
-            conn
-        };
-
+    pub fn new() -> Result<Self, std::io::Error> {
+        let conn = UdpSocket::bind("127.0.0.1:0")?;
+        conn.connect(format!("127.0.0.1:{DAEMON_PORT}"))?;
+        let _ = conn.set_nonblocking(true);
+        let _ = conn.set_read_timeout(Some(TIMEOUT));
         Ok(Self {
             conn,
             packets: Vec::new(),
@@ -75,7 +63,7 @@ impl DaemonSession {
 
         let mut master_buffer = Vec::new();
 
-        while let Ok(len) = self.conn.try_recv(&mut buffer) {
+        while let Ok(len) = self.conn.recv(&mut buffer) {
             master_buffer.append(&mut buffer[0..len].to_vec());
         }
 
