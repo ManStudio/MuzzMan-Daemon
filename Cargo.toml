@@ -29,7 +29,7 @@ debug = true
 [dependencies]
 bytes-kman = "0.1"
 # muzzman-lib = "0.3.5"
-muzzman-lib = {path = "../muzzman-lib"}
+muzzman-lib = {git = "https://github.com/ManStudio/MuzzMan-Lib"}
 dirs = "4.0.0"
 log = "0.4"
 env_logger = "0.10"
