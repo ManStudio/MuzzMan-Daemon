@@ -12,6 +12,7 @@ use muzzman_lib::{
 
 // send
 #[derive(Clone, Debug, Bytes)]
+#[allow(clippy::large_enum_variant)]
 pub enum ServerPackets {
     LoadModule {
         id: u128,
@@ -117,6 +118,15 @@ pub enum ServerPackets {
         module_id: ModuleId,
     },
     ModuleSetElementSettings {
+        id: u128,
+        module_id: ModuleId,
+        to: Values,
+    },
+    ModuleGetLocationSettings {
+        id: u128,
+        module_id: ModuleId,
+    },
+    ModuleSetLocationSettings {
         id: u128,
         module_id: ModuleId,
         to: Values,
@@ -314,6 +324,10 @@ pub enum ServerPackets {
         element_id: ElementId,
         to: bool,
     },
+    ElementIsError {
+        id: u128,
+        element_id: ElementId,
+    },
     ElementResolvModule {
         id: u128,
         element_id: ElementId,
@@ -401,6 +415,73 @@ pub enum ServerPackets {
         location_id: LocationId,
         range: Range<usize>,
     },
+    LocationGetModule {
+        id: u128,
+        location_id: LocationId,
+    },
+    LocationSetModule {
+        id: u128,
+        location_id: LocationId,
+        module_id: Option<ModuleId>,
+    },
+    LocationGetSettings {
+        id: u128,
+        location_id: LocationId,
+    },
+    LocationSetSettings {
+        id: u128,
+        location_id: LocationId,
+        to: Values,
+    },
+    LocationGetModuleSettings {
+        id: u128,
+        location_id: LocationId,
+    },
+    LocationSetModuleSettings {
+        id: u128,
+        location_id: LocationId,
+        to: Values,
+    },
+    LocationGetStatuses {
+        id: u128,
+        location_id: LocationId,
+    },
+    LocationSetStatuses {
+        id: u128,
+        location_id: LocationId,
+        statuses: Vec<String>,
+    },
+    LocationGetStatus {
+        id: u128,
+        location_id: LocationId,
+    },
+    LocationSetStatus {
+        id: u128,
+        location_id: LocationId,
+        to: usize,
+    },
+    LocationGetProgress {
+        id: u128,
+        location_id: LocationId,
+    },
+    LocationSetProgress {
+        id: u128,
+        location_id: LocationId,
+        to: f32,
+    },
+    LocationIsEnabled {
+        id: u128,
+        location_id: LocationId,
+    },
+    LocationSetEnabled {
+        id: u128,
+        location_id: LocationId,
+        to: bool,
+    },
+    LocationIsError {
+        id: u128,
+        location_id: LocationId,
+    },
     LocationNotify {
         id: u128,
         location_id: LocationId,
@@ -462,6 +543,8 @@ pub enum ClientPackets {
     ModuleSetSettings(u128, Result<(), SessionError>),
     ModuleGetElementSettings(u128, Result<Values, SessionError>),
     ModuleSetElementSettings(u128, Result<(), SessionError>),
+    ModuleGetLocationSettings(u128, Result<Values, SessionError>),
+    ModuleSetLocationSettings(u128, Result<(), SessionError>),
     ModuleInitLocation(u128, Result<(), SessionError>),
     ModuleInitElement(u128, Result<(), SessionError>),
     ModuleAcceptUrl(u128, Result<bool, SessionError>),
@@ -487,6 +570,22 @@ pub enum ClientPackets {
     LocationSetShouldSave(u128, Result<(), SessionError>),
     LocationGetElementsLen(u128, Result<usize, SessionError>),
     LocationGetElements(u128, Result<Vec<ElementId>, SessionError>),
+    LocationGetModule(u128, Result<Option<ModuleId>, SessionError>),
+    LocationSetModule(u128, Result<(), SessionError>),
+    LocationGetSettings(u128, Result<Values, SessionError>),
+    LocationSetSettings(u128, Result<(), SessionError>),
+    LocationGetModuleSettings(u128, Result<Values, SessionError>),
+    LocationSetModuleSettings(u128, Result<(), SessionError>),
+    LocationGetStatuses(u128, Result<Vec<String>, SessionError>),
+    LocationSetStatuses(u128, Result<(), SessionError>),
+    LocationGetStatus(u128, Result<usize, SessionError>),
+    LocationSetStatus(u128, Result<(), SessionError>),
+    LocationGetProgress(u128, Result<f32, SessionError>),
+    LocationSetProgress(u128, Result<(), SessionError>),
+    LocationIsEnabled(u128, Result<bool, SessionError>),
+    LocationSetEnabled(u128, Result<(), SessionError>),
+    LocationIsError(u128, Result<bool, SessionError>),
+
     LocationNotify(u128, Result<(), SessionError>),
     LocationEmit(u128, Result<(), SessionError>),
     LocationSubscribe(u128, Result<(), SessionError>),
@@ -522,6 +621,7 @@ pub enum ClientPackets {
     ElementSetShouldSave(u128, Result<(), SessionError>),
     ElementGetEnabled(u128, Result<bool, SessionError>),
     ElementSetEnabled(u128, Result<(), SessionError>),
+    ElementIsError(u128, Result<bool, SessionError>),
     ElementResolvModule(u128, Result<bool, SessionError>),
     ElementWait(u128, Result<(), SessionError>),
     ElementGetInfo(u128, Box<Result<ElementInfo, SessionError>>),
@@ -631,6 +731,24 @@ impl ClientPackets {
             ClientPackets::LoadLocationInfo(id, _) => *id,
             ClientPackets::GetVersion(id, _) => *id,
             ClientPackets::GetVersionText(id, _) => *id,
+            ClientPackets::ModuleGetLocationSettings(id, _) => *id,
+            ClientPackets::ModuleSetLocationSettings(id, _) => *id,
+            ClientPackets::ElementIsError(id, _) => *id,
+            ClientPackets::LocationGetModule(id, _) => *id,
+            ClientPackets::LocationSetModule(id, _) => *id,
+            ClientPackets::LocationGetSettings(id, _) => *id,
+            ClientPackets::LocationSetSettings(id, _) => *id,
+            ClientPackets::LocationGetModuleSettings(id, _) => *id,
+            ClientPackets::LocationSetModuleSettings(id, _) => *id,
+            ClientPackets::LocationGetStatuses(id, _) => *id,
+            ClientPackets::LocationSetStatuses(id, _) => *id,
+            ClientPackets::LocationGetStatus(id, _) => *id,
+            ClientPackets::LocationSetStatus(id, _) => *id,
+            ClientPackets::LocationGetProgress(id, _) => *id,
+            ClientPackets::LocationSetProgress(id, _) => *id,
+            ClientPackets::LocationIsEnabled(id, _) => *id,
+            ClientPackets::LocationSetEnabled(id, _) => *id,
+            ClientPackets::LocationIsError(id, _) => *id,
         }
     }
 }

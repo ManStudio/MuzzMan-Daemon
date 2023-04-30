@@ -414,6 +414,39 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
+    fn module_get_location_settings(&self, module_id: &ModuleId) -> Result<Values, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::ModuleGetLocationSettings {
+            id,
+            module_id: *module_id,
+        };
+        self.send(packet);
+        if let Some(ClientPackets::ModuleGetLocationSettings(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn module_set_location_settings(
+        &self,
+        module_id: &ModuleId,
+        data: Values,
+    ) -> Result<(), SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::ModuleSetLocationSettings {
+            id,
+            module_id: *module_id,
+            to: data,
+        };
+        self.send(packet);
+        if let Some(ClientPackets::ModuleSetLocationSettings(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
     fn module_init_location(
         &self,
         module_id: &ModuleId,
@@ -1061,6 +1094,21 @@ impl TSession for Box<dyn TDaemonSession> {
         }
     }
 
+    fn element_is_error(&self, element_id: &ElementId) -> Result<bool, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::ElementIsError {
+            id,
+            element_id: element_id.clone(),
+        };
+
+        self.send(packet);
+        if let Some(ClientPackets::ElementIsError(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
     fn element_resolv_module(&self, element_id: &ElementId) -> Result<bool, SessionError> {
         let id = self.generate();
         let packet = ServerPackets::ElementResolvModule {
@@ -1481,6 +1529,268 @@ impl TSession for Box<dyn TDaemonSession> {
                 }
                 Err(err) => Err(err),
             }
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn location_get_module(&self, location_id: &LocationId) -> Result<Option<MRef>, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LocationGetModule {
+            id,
+            location_id: location_id.clone(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationGetModule(_, response)) = self.waiting_for(id) {
+            match response {
+                Ok(option_module_id) => {
+                    if let Some(module_id) = option_module_id {
+                        Ok(Some(self.get_module_ref(&module_id)?))
+                    } else {
+                        Ok(None)
+                    }
+                }
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn location_set_module(
+        &self,
+        location_id: &LocationId,
+        module_id: Option<ModuleId>,
+    ) -> Result<(), SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LocationSetModule {
+            id,
+            location_id: location_id.clone(),
+            module_id,
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationSetModule(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn location_get_settings(&self, location_id: &LocationId) -> Result<Values, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LocationGetSettings {
+            id,
+            location_id: location_id.clone(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationGetSettings(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn location_set_settings(
+        &self,
+        location_id: &LocationId,
+        data: Values,
+    ) -> Result<(), SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LocationSetSettings {
+            id,
+            location_id: location_id.clone(),
+            to: data,
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationSetSettings(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn location_get_module_settings(
+        &self,
+        location_id: &LocationId,
+    ) -> Result<Values, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LocationGetModuleSettings {
+            id,
+            location_id: location_id.clone(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationGetModuleSettings(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn location_set_module_settings(
+        &self,
+        location_id: &LocationId,
+        data: Values,
+    ) -> Result<(), SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LocationSetModuleSettings {
+            id,
+            location_id: location_id.clone(),
+            to: data,
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationSetModuleSettings(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn location_get_statuses(&self, location_id: &LocationId) -> Result<Vec<String>, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LocationGetStatuses {
+            id,
+            location_id: location_id.clone(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationGetStatuses(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn location_set_statuses(
+        &self,
+        location_id: &LocationId,
+        statuses: Vec<String>,
+    ) -> Result<(), SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LocationSetStatuses {
+            id,
+            location_id: location_id.clone(),
+            statuses,
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationSetStatuses(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn location_get_status(&self, location_id: &LocationId) -> Result<usize, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LocationGetStatus {
+            id,
+            location_id: location_id.clone(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationGetStatus(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn location_set_status(
+        &self,
+        location_id: &LocationId,
+        status: usize,
+    ) -> Result<(), SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LocationSetStatus {
+            id,
+            location_id: location_id.clone(),
+            to: status,
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationSetStatus(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn location_get_progress(&self, location_id: &LocationId) -> Result<f32, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LocationGetProgress {
+            id,
+            location_id: location_id.clone(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationGetProgress(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn location_set_progress(
+        &self,
+        location_id: &LocationId,
+        progress: f32,
+    ) -> Result<(), SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LocationSetProgress {
+            id,
+            location_id: location_id.clone(),
+            to: progress,
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationSetProgress(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn location_is_enabled(&self, location_id: &LocationId) -> Result<bool, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LocationIsEnabled {
+            id,
+            location_id: location_id.clone(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationIsEnabled(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn location_set_enabled(
+        &self,
+        location_id: &LocationId,
+        enabled: bool,
+        storage: Option<Storage>,
+    ) -> Result<(), SessionError> {
+        if storage.is_some() {
+            return Err("Storage should be None, because Storage cannot be transfered to the network because cantains pointers".to_string().into());
+        }
+
+        let id = self.generate();
+        let packet = ServerPackets::LocationSetEnabled {
+            id,
+            location_id: location_id.clone(),
+            to: enabled,
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationSetEnabled(_, response)) = self.waiting_for(id) {
+            response
+        } else {
+            Err(SessionError::ServerTimeOut)
+        }
+    }
+
+    fn location_is_error(&self, location_id: &LocationId) -> Result<bool, SessionError> {
+        let id = self.generate();
+        let packet = ServerPackets::LocationIsError {
+            id,
+            location_id: location_id.clone(),
+        };
+        self.send(packet);
+        if let Some(ClientPackets::LocationIsError(_, response)) = self.waiting_for(id) {
+            response
         } else {
             Err(SessionError::ServerTimeOut)
         }

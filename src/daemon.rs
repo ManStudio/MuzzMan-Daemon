@@ -905,6 +905,236 @@ impl Daemon {
                             )
                             .await
                     }
+                    ServerPackets::ModuleGetLocationSettings { id, module_id } => {
+                        self.inner
+                            .send(
+                                ClientPackets::ModuleGetLocationSettings(
+                                    id,
+                                    self.session.module_get_location_settings(&module_id),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::ModuleSetLocationSettings { id, module_id, to } => {
+                        self.inner
+                            .send(
+                                ClientPackets::ModuleSetLocationSettings(
+                                    id,
+                                    self.session.module_set_location_settings(&module_id, to),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::ElementIsError { id, element_id } => {
+                        self.inner
+                            .send(
+                                ClientPackets::ElementIsError(
+                                    id,
+                                    self.session.element_is_error(&element_id),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::LocationGetModule { id, location_id } => {
+                        self.inner
+                            .send(
+                                ClientPackets::LocationGetModule(
+                                    id,
+                                    self.session.location_get_module(&location_id).map(
+                                        |option_module_ref| {
+                                            option_module_ref.map(|module_ref| module_ref.id())
+                                        },
+                                    ),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::LocationSetModule {
+                        id,
+                        location_id,
+                        module_id,
+                    } => {
+                        self.inner
+                            .send(
+                                ClientPackets::LocationSetModule(
+                                    id,
+                                    self.session.location_set_module(&location_id, module_id),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::LocationGetSettings { id, location_id } => {
+                        self.inner
+                            .send(
+                                ClientPackets::LocationGetSettings(
+                                    id,
+                                    self.session.location_get_settings(&location_id),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::LocationSetSettings {
+                        id,
+                        location_id,
+                        to,
+                    } => {
+                        self.inner
+                            .send(
+                                ClientPackets::LocationSetSettings(
+                                    id,
+                                    self.session.location_set_settings(&location_id, to),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::LocationGetModuleSettings { id, location_id } => {
+                        self.inner
+                            .send(
+                                ClientPackets::LocationGetModuleSettings(
+                                    id,
+                                    self.session.location_get_module_settings(&location_id),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::LocationSetModuleSettings {
+                        id,
+                        location_id,
+                        to,
+                    } => {
+                        self.inner
+                            .send(
+                                ClientPackets::LocationSetModuleSettings(
+                                    id,
+                                    self.session.location_set_module_settings(&location_id, to),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::LocationGetStatuses { id, location_id } => {
+                        self.inner
+                            .send(
+                                ClientPackets::LocationGetStatuses(
+                                    id,
+                                    self.session.location_get_statuses(&location_id),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::LocationSetStatuses {
+                        id,
+                        location_id,
+                        statuses,
+                    } => {
+                        self.inner
+                            .send(
+                                ClientPackets::LocationSetStatuses(
+                                    id,
+                                    self.session.location_set_statuses(&location_id, statuses),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::LocationGetStatus { id, location_id } => {
+                        self.inner
+                            .send(
+                                ClientPackets::LocationGetStatus(
+                                    id,
+                                    self.session.location_get_status(&location_id),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::LocationSetStatus {
+                        id,
+                        location_id,
+                        to,
+                    } => {
+                        self.inner
+                            .send(
+                                ClientPackets::LocationSetStatus(
+                                    id,
+                                    self.session.location_set_status(&location_id, to),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::LocationGetProgress { id, location_id } => {
+                        self.inner
+                            .send(
+                                ClientPackets::LocationGetProgress(
+                                    id,
+                                    self.session.location_get_progress(&location_id),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::LocationSetProgress {
+                        id,
+                        location_id,
+                        to,
+                    } => {
+                        self.inner
+                            .send(
+                                ClientPackets::LocationSetProgress(
+                                    id,
+                                    self.session.location_set_progress(&location_id, to),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::LocationIsEnabled { id, location_id } => {
+                        self.inner
+                            .send(
+                                ClientPackets::LocationIsEnabled(
+                                    id,
+                                    self.session.location_is_enabled(&location_id),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::LocationSetEnabled {
+                        id,
+                        location_id,
+                        to,
+                    } => {
+                        self.inner
+                            .send(
+                                ClientPackets::LocationSetEnabled(
+                                    id,
+                                    self.session.location_set_enabled(&location_id, to, None),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
+                    ServerPackets::LocationIsError { id, location_id } => {
+                        self.inner
+                            .send(
+                                ClientPackets::LocationIsError(
+                                    id,
+                                    self.session.location_is_error(&location_id),
+                                ),
+                                &addr,
+                            )
+                            .await
+                    }
                 }
             }
         }
