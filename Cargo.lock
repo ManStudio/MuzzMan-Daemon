@@ -253,7 +253,7 @@ dependencies = [
 [[package]]
 name = "muzzman-lib"
 version = "0.3.5"
-source = "git+https://github.com/ManStudio/MuzzMan-Lib#69f42557b3ff08a933032c42a3768282dd4cafbb"
+source = "git+https://github.com/ManStudio/MuzzMan-Lib#dba8b8e5da4550c65fd96935c169454cc0315cb4"
 dependencies = [
  "bytes-kman",
  "dirs",
@@ -261,6 +261,7 @@ dependencies = [
  "libloading",
  "log",
  "muzzman-lib-macros",
+ "once_cell",
  "rand",
  "serde",
 ]
@@ -268,7 +269,7 @@ dependencies = [
 [[package]]
 name = "muzzman-lib-macros"
 version = "0.1.3"
-source = "git+https://github.com/ManStudio/MuzzMan-Lib#69f42557b3ff08a933032c42a3768282dd4cafbb"
+source = "git+https://github.com/ManStudio/MuzzMan-Lib#dba8b8e5da4550c65fd96935c169454cc0315cb4"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -284,6 +285,12 @@ dependencies = [
  "hermit-abi 0.2.6",
  "libc",
 ]
+
+[[package]]
+name = "once_cell"
+version = "1.17.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b7e5500299e16ebb147ae15a00a942af264cf3688f47923b8fc2cd5858f23ad3"
 
 [[package]]
 name = "pin-project-lite"

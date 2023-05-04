@@ -3,8 +3,8 @@ use muzzman_daemon::{
 };
 
 fn main() {
-    // env_logger::init();
-    muzzman_lib::logger::init(log::LevelFilter::max());
+    muzzman_lib::logger::LOGGER_STATE.write().unwrap().log_level = log::LevelFilter::max();
+    muzzman_lib::logger::init();
 
     let runtime = tokio::runtime::Runtime::new().unwrap();
 
