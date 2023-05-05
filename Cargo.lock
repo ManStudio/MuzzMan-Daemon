@@ -253,7 +253,7 @@ dependencies = [
 [[package]]
 name = "muzzman-lib"
 version = "0.3.5"
-source = "git+https://github.com/ManStudio/MuzzMan-Lib#3ce27aafd611935147645fcbdf7bc0ef3036d374"
+source = "git+https://github.com/ManStudio/MuzzMan-Lib#15cc1ac3fcb553ac2bc9dc2b53331eb8e23f41ea"
 dependencies = [
  "bytes-kman",
  "dirs",
@@ -269,7 +269,7 @@ dependencies = [
 [[package]]
 name = "muzzman-lib-macros"
 version = "0.1.3"
-source = "git+https://github.com/ManStudio/MuzzMan-Lib#3ce27aafd611935147645fcbdf7bc0ef3036d374"
+source = "git+https://github.com/ManStudio/MuzzMan-Lib#15cc1ac3fcb553ac2bc9dc2b53331eb8e23f41ea"
 dependencies = [
  "proc-macro2",
  "quote",
